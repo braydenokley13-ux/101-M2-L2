@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA League Commissioner - Revenue Sharing Challenge</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Background -->
+    <div class="basketball-court"></div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="basketball-icon">🏀</div>
+                <h1>NBA League Commissioner</h1>
+            </div>
+            <div class="subtitle">Revenue Sharing Challenge</div>
+        </header>
+
+        <!-- Level Selection Screen -->
+        <div id="levelSelect" class="level-select">
+            <h2>Choose Your Challenge</h2>
+            <p class="instructions">You're the NBA Commissioner! Help make the league fair for all teams.</p>
+
+            <div class="levels-grid">
+                <div class="level-card" data-level="1">
+                    <div class="level-badge">Level 1</div>
+                    <h3>🏀 Rookie League</h3>
+                    <p>Learn the basics of revenue sharing</p>
+                    <div class="level-stats">
+                        <span>Target: 70% Fairness</span>
+                    </div>
+                    <button class="play-btn" onclick="startLevel(1)">Play</button>
+                    <div class="completion-badge" id="level1Complete">✅ Completed</div>
+                </div>
+
+                <div class="level-card locked" data-level="2">
+                    <div class="level-badge">Level 2</div>
+                    <h3>⭐ All-Star Challenge</h3>
+                    <p>Balance big and small market teams</p>
+                    <div class="level-stats">
+                        <span>Target: 75% Fairness</span>
+                    </div>
+                    <button class="play-btn" onclick="startLevel(2)">Play</button>
+                    <div class="completion-badge" id="level2Complete">✅ Completed</div>
+                </div>
+
+                <div class="level-card locked" data-level="3">
+                    <div class="level-badge">Level 3</div>
+                    <h3>🏆 Conference Finals</h3>
+                    <p>Navigate luxury tax challenges</p>
+                    <div class="level-stats">
+                        <span>Target: 80% Fairness</span>
+                    </div>
+                    <button class="play-btn" onclick="startLevel(3)">Play</button>
+                    <div class="completion-badge" id="level3Complete">✅ Completed</div>
+                </div>
+
+                <div class="level-card locked" data-level="4">
+                    <div class="level-badge">Level 4</div>
+                    <h3>🎖️ NBA Finals</h3>
+                    <p>Master complex revenue rules</p>
+                    <div class="level-stats">
+                        <span>Target: 85% Fairness</span>
+                    </div>
+                    <button class="play-btn" onclick="startLevel(4)">Play</button>
+                    <div class="completion-badge" id="level4Complete">✅ Completed</div>
+                </div>
+
+                <div class="level-card locked" data-level="5">
+                    <div class="level-badge">Level 5</div>
+                    <h3>👑 Commissioner Legend</h3>
+                    <p>Ultimate balancing challenge</p>
+                    <div class="level-stats">
+                        <span>Target: 88% Fairness</span>
+                    </div>
+                    <button class="play-btn" onclick="startLevel(5)">Play</button>
+                    <div class="completion-badge" id="level5Complete">✅ Completed</div>
+                </div>
+            </div>
+
+            <!-- Claim Codes Display -->
+            <div class="claim-codes-section">
+                <h3>🎯 Your Achievement Codes</h3>
+                <div class="codes-grid">
+                    <div class="code-card" id="code1">
+                        <div class="code-label">Level 1 Complete</div>
+                        <div class="code-value locked">🔒 Complete Level 1</div>
+                    </div>
+                    <div class="code-card" id="code2">
+                        <div class="code-label">Level 2 Complete</div>
+                        <div class="code-value locked">🔒 Complete Level 2</div>
+                    </div>
+                    <div class="code-card" id="code3">
+                        <div class="code-label">Level 3 Complete</div>
+                        <div class="code-value locked">🔒 Complete Level 3</div>
+                    </div>
+                    <div class="code-card special" id="code3bonus">
+                        <div class="code-label">⭐ 3 Levels Bonus</div>
+                        <div class="code-value locked">🔒 Complete 3 Levels</div>
+                    </div>
+                    <div class="code-card" id="code4">
+                        <div class="code-label">Level 4 Complete</div>
+                        <div class="code-value locked">🔒 Complete Level 4</div>
+                    </div>
+                    <div class="code-card" id="code5">
+                        <div class="code-label">Level 5 Complete</div>
+                        <div class="code-value locked">🔒 Complete Level 5</div>
+                    </div>
+                    <div class="code-card special master" id="code5bonus">
+                        <div class="code-label">🏆 MASTER COMMISSIONER</div>
+                        <div class="code-value locked">🔒 Complete All 5 Levels</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="game-screen hidden">
+            <!-- Level Info Bar -->
+            <div class="level-info-bar">
+                <button class="back-btn" onclick="backToLevels()">← Back to Levels</button>
+                <div class="current-level-display">
+                    <span id="currentLevelName">Level 1: Rookie League</span>
+                </div>
+                <div class="goal-display">
+                    Goal: <span id="goalFairness">70</span>% Fairness
+                </div>
+            </div>
+
+            <!-- Tutorial Overlay (Level 1 only) -->
+            <div id="tutorialOverlay" class="tutorial-overlay hidden">
+                <div class="tutorial-content">
+                    <h3>Welcome, Commissioner! 👋</h3>
+                    <p id="tutorialText"></p>
+                    <button class="tutorial-btn" onclick="nextTutorialStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Coach's Tips -->
+            <div class="coach-corner">
+                <div class="coach-icon">🧑‍🏫</div>
+                <div class="coach-message" id="coachMessage">
+                    Adjust the revenue sharing slider to help small market teams compete!
+                </div>
+            </div>
+
+            <!-- Main Dashboard -->
+            <div class="dashboard">
+                <!-- Left Panel: Controls -->
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label for="sharingSlider">
+                            <span class="label-text">Revenue Sharing Percentage</span>
+                            <span class="label-value" id="sharingValue">0%</span>
+                        </label>
+                        <input type="range" id="sharingSlider" class="slider" min="0" max="100" value="0" step="1">
+                        <div class="slider-labels">
+                            <span>0%</span>
+                            <span>50%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+
+                    <div class="control-group" id="distributionControl">
+                        <label class="label-text">Distribution Method</label>
+                        <div class="toggle-group">
+                            <button class="toggle-btn active" data-type="equal" onclick="setDistribution('equal')">
+                                Equal Split
+                            </button>
+                            <button class="toggle-btn" data-type="weighted" onclick="setDistribution('weighted')">
+                                Market Weighted
+                            </button>
+                        </div>
+                        <div class="distribution-explainer">
+                            <p id="distributionExplain">Money is split equally among all teams</p>
+                        </div>
+                    </div>
+
+                    <div class="control-group" id="luxuryTaxControl" style="display: none;">
+                        <label for="luxurySlider">
+                            <span class="label-text">Luxury Tax Threshold ($M)</span>
+                            <span class="label-value" id="luxuryValue">$150M</span>
+                        </label>
+                        <input type="range" id="luxurySlider" class="slider" min="100" max="200" value="150" step="5">
+                    </div>
+
+                    <!-- Fairness Meter -->
+                    <div class="fairness-meter">
+                        <div class="meter-header">
+                            <span>League Fairness Score</span>
+                            <span class="score-value" id="fairnessScore">0%</span>
+                        </div>
+                        <div class="meter-bar">
+                            <div class="meter-fill" id="meterFill" style="width: 0%"></div>
+                            <div class="meter-goal" id="meterGoal" style="left: 70%"></div>
+                        </div>
+                        <div class="meter-status" id="meterStatus">
+                            Keep adjusting to reach your goal!
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="quick-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Total League Revenue</div>
+                            <div class="stat-value" id="totalRevenue">$10.0B</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Revenue Gap</div>
+                            <div class="stat-value" id="revenueGap">$140M</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Visualization -->
+                <div class="visualization-panel">
+                    <!-- Team Cards -->
+                    <div class="teams-container">
+                        <h3 class="section-title">NBA Teams</h3>
+                        <div class="teams-grid" id="teamsGrid"></div>
+                    </div>
+
+                    <!-- Chart -->
+                    <div class="chart-container">
+                        <h3 class="section-title">Revenue Comparison</h3>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Modal -->
+            <div id="successModal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="confetti"></div>
+                    <h2>🎉 Level Complete!</h2>
+                    <p class="success-message" id="successMessage"></p>
+                    <div class="claim-code-reveal">
+                        <div class="code-label">Your Claim Code:</div>
+                        <div class="code-box" id="claimCodeBox">
+                            <span id="claimCodeText"></span>
+                            <button class="copy-btn" onclick="copyClaimCode()">Copy</button>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-secondary" onclick="closeSuccessModal()">Next Level</button>
+                        <button class="btn-primary" onclick="retryLevel()">Try Again</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/parityEngine.js"></script>
+    <script src="js/gameLogic.js"></script>
+    <script src="js/visualization.js"></script>
+</body>
+</html>
