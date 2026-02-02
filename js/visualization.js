@@ -1,5 +1,6 @@
 /**
  * Visualization - Chart.js implementation for revenue comparison
+ * OVERHAULED: Now shows team satisfaction indicators
  */
 
 let revenueChart = null;
@@ -77,7 +78,7 @@ function updateChart(results) {
                     labels: {
                         color: '#dfe6e9',
                         font: {
-                            size: 14,
+                            size: 13,
                             weight: 'bold'
                         },
                         padding: 15,
@@ -86,14 +87,18 @@ function updateChart(results) {
                     }
                 },
                 tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
                     titleColor: '#ffeaa7',
                     bodyColor: '#dfe6e9',
                     borderColor: '#74b9ff',
                     borderWidth: 1,
-                    padding: 12,
+                    padding: 14,
                     displayColors: true,
                     callbacks: {
+                        title: function(context) {
+                            const team = results[context[0].dataIndex];
+                            return `${team.name} ${team.mood}`;
+                        },
                         label: function(context) {
                             const label = context.dataset.label || '';
                             const value = context.parsed.y;
@@ -104,7 +109,11 @@ function updateChart(results) {
                                 const team = results[context.dataIndex];
                                 const change = team.change;
                                 const symbol = change >= 0 ? '+' : '';
-                                return `Change: ${symbol}$${change}M`;
+                                return [
+                                    `Change: ${symbol}$${change}M`,
+                                    `Satisfaction: ${team.satisfaction}%`,
+                                    `Market: ${team.market.toUpperCase()}`
+                                ];
                             }
                             return '';
                         }
@@ -119,7 +128,7 @@ function updateChart(results) {
                     ticks: {
                         color: '#dfe6e9',
                         font: {
-                            size: 12,
+                            size: 11,
                             weight: 'bold'
                         },
                         maxRotation: 45,
@@ -146,14 +155,14 @@ function updateChart(results) {
                         text: 'Team Revenue (Millions)',
                         color: '#ffeaa7',
                         font: {
-                            size: 14,
+                            size: 13,
                             weight: 'bold'
                         }
                     }
                 }
             },
             animation: {
-                duration: 750,
+                duration: 500,
                 easing: 'easeInOutQuart'
             },
             interaction: {

@@ -19,21 +19,33 @@
                 <div class="basketball-icon">🏀</div>
                 <h1>NBA League Commissioner</h1>
             </div>
-            <div class="subtitle">Revenue Sharing Challenge</div>
+            <div class="subtitle">Revenue Sharing Challenge - Balance Competing Interests!</div>
         </header>
 
         <!-- Level Selection Screen -->
         <div id="levelSelect" class="level-select">
             <h2>Choose Your Challenge</h2>
-            <p class="instructions">You're the NBA Commissioner! Help make the league fair for all teams.</p>
+            <p class="instructions">You're the NBA Commissioner! Balance the interests of big markets, small markets, AND league parity. It's harder than it looks!</p>
 
             <div class="levels-grid">
                 <div class="level-card" data-level="1">
                     <div class="level-badge">Level 1</div>
+                    <div class="difficulty-badge easy">Easy</div>
                     <h3>🏀 Rookie League</h3>
-                    <p>Learn the basics of revenue sharing</p>
+                    <p>Learn the basics - balance three competing interests</p>
                     <div class="level-stats">
-                        <span>Target: 70% Fairness</span>
+                        <div class="stat-row">
+                            <span>Parity Target:</span>
+                            <span>65%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Big Market Min:</span>
+                            <span>50%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Small Market Min:</span>
+                            <span>60%</span>
+                        </div>
                     </div>
                     <button class="play-btn" onclick="startLevel(1)">Play</button>
                     <div class="completion-badge" id="level1Complete">✅ Completed</div>
@@ -41,10 +53,22 @@
 
                 <div class="level-card locked" data-level="2">
                     <div class="level-badge">Level 2</div>
+                    <div class="difficulty-badge medium">Medium</div>
                     <h3>⭐ All-Star Challenge</h3>
-                    <p>Balance big and small market teams</p>
+                    <p>Big market owners are getting vocal about fairness</p>
                     <div class="level-stats">
-                        <span>Target: 75% Fairness</span>
+                        <div class="stat-row">
+                            <span>Parity Target:</span>
+                            <span>68%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Big Market Min:</span>
+                            <span>55%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Small Market Min:</span>
+                            <span>65%</span>
+                        </div>
                     </div>
                     <button class="play-btn" onclick="startLevel(2)">Play</button>
                     <div class="completion-badge" id="level2Complete">✅ Completed</div>
@@ -52,10 +76,22 @@
 
                 <div class="level-card locked" data-level="3">
                     <div class="level-badge">Level 3</div>
+                    <div class="difficulty-badge hard">Hard</div>
                     <h3>🏆 Conference Finals</h3>
-                    <p>Navigate luxury tax challenges</p>
+                    <p>Luxury tax adds another tool - use it wisely</p>
                     <div class="level-stats">
-                        <span>Target: 80% Fairness</span>
+                        <div class="stat-row">
+                            <span>Parity Target:</span>
+                            <span>72%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Big Market Min:</span>
+                            <span>52%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Small Market Min:</span>
+                            <span>68%</span>
+                        </div>
                     </div>
                     <button class="play-btn" onclick="startLevel(3)">Play</button>
                     <div class="completion-badge" id="level3Complete">✅ Completed</div>
@@ -63,10 +99,22 @@
 
                 <div class="level-card locked" data-level="4">
                     <div class="level-badge">Level 4</div>
+                    <div class="difficulty-badge very-hard">Very Hard</div>
                     <h3>🎖️ NBA Finals</h3>
-                    <p>Master complex revenue rules</p>
+                    <p>The sweet spot is narrow - precision matters</p>
                     <div class="level-stats">
-                        <span>Target: 85% Fairness</span>
+                        <div class="stat-row">
+                            <span>Parity Target:</span>
+                            <span>75%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Big Market Min:</span>
+                            <span>48%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Small Market Min:</span>
+                            <span>72%</span>
+                        </div>
                     </div>
                     <button class="play-btn" onclick="startLevel(4)">Play</button>
                     <div class="completion-badge" id="level4Complete">✅ Completed</div>
@@ -74,14 +122,34 @@
 
                 <div class="level-card locked" data-level="5">
                     <div class="level-badge">Level 5</div>
+                    <div class="difficulty-badge expert">Expert</div>
                     <h3>👑 Commissioner Legend</h3>
-                    <p>Ultimate balancing challenge</p>
+                    <p>Ultimate challenge - every team has an opinion</p>
                     <div class="level-stats">
-                        <span>Target: 88% Fairness</span>
+                        <div class="stat-row">
+                            <span>Parity Target:</span>
+                            <span>78%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Big Market Min:</span>
+                            <span>45%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Small Market Min:</span>
+                            <span>75%</span>
+                        </div>
                     </div>
                     <button class="play-btn" onclick="startLevel(5)">Play</button>
                     <div class="completion-badge" id="level5Complete">✅ Completed</div>
                 </div>
+            </div>
+
+            <!-- Key Concept Box -->
+            <div class="concept-box">
+                <h3>💡 The Commissioner's Dilemma</h3>
+                <p><strong>Big markets say:</strong> "We earned this revenue! Why should we subsidize our competition?"</p>
+                <p><strong>Small markets say:</strong> "We can't compete without help! How is that fair to our fans?"</p>
+                <p><strong>Your job:</strong> Find the balance where BOTH sides can live with the deal. That's real commissioner work!</p>
             </div>
 
             <!-- Claim Codes Display -->
@@ -127,9 +195,7 @@
                 <button class="back-btn" onclick="backToLevels()">← Back to Levels</button>
                 <div class="current-level-display">
                     <span id="currentLevelName">Level 1: Rookie League</span>
-                </div>
-                <div class="goal-display">
-                    Goal: <span id="goalFairness">70</span>% Fairness
+                    <span class="difficulty-tag" id="levelDifficulty">Easy</span>
                 </div>
             </div>
 
@@ -142,12 +208,71 @@
                 </div>
             </div>
 
+            <!-- Warning Messages -->
+            <div id="warningMessages" class="warning-messages" style="display: none;"></div>
+
             <!-- Coach's Tips -->
             <div class="coach-corner">
                 <div class="coach-icon">🧑‍🏫</div>
                 <div class="coach-message" id="coachMessage">
-                    Adjust the revenue sharing slider to help small market teams compete!
+                    Balance revenue sharing to keep everyone happy - but that's easier said than done!
                 </div>
+            </div>
+
+            <!-- Three Metrics Display -->
+            <div class="metrics-dashboard">
+                <!-- Parity Meter -->
+                <div class="metric-card parity-card">
+                    <div class="metric-header">
+                        <span class="metric-title">⚖️ League Parity</span>
+                        <span class="metric-goal">Goal: <span id="goalParity">65</span>%+</span>
+                    </div>
+                    <div class="metric-bar-container">
+                        <div class="metric-bar parity-bar" id="parityFill" style="width: 0%"></div>
+                    </div>
+                    <div class="metric-footer">
+                        <span class="metric-score" id="parityScore">0%</span>
+                        <span class="status-indicator status-fail" id="parityIndicator">✗</span>
+                    </div>
+                    <div class="metric-explain">Ratio of smallest to largest team revenue</div>
+                </div>
+
+                <!-- Big Market Satisfaction -->
+                <div class="metric-card big-market-card">
+                    <div class="metric-header">
+                        <span class="metric-title">💰 Big Market Owners</span>
+                        <span class="metric-goal">Min: <span id="goalBigMarket">50</span>%</span>
+                    </div>
+                    <div class="metric-bar-container">
+                        <div class="metric-bar big-market-bar" id="bigMarketFill" style="width: 0%"></div>
+                    </div>
+                    <div class="metric-footer">
+                        <span class="metric-score" id="bigMarketScore">0%</span>
+                        <span class="status-indicator status-fail" id="bigMarketIndicator">✗</span>
+                    </div>
+                    <div class="metric-explain">"We earned this - why subsidize others?"</div>
+                </div>
+
+                <!-- Small Market Viability -->
+                <div class="metric-card small-market-card">
+                    <div class="metric-header">
+                        <span class="metric-title">🏟️ Small Market Survival</span>
+                        <span class="metric-goal">Min: <span id="goalSmallMarket">60</span>%</span>
+                    </div>
+                    <div class="metric-bar-container">
+                        <div class="metric-bar small-market-bar" id="smallMarketFill" style="width: 0%"></div>
+                    </div>
+                    <div class="metric-footer">
+                        <span class="metric-score" id="smallMarketScore">0%</span>
+                        <span class="status-indicator status-fail" id="smallMarketIndicator">✗</span>
+                    </div>
+                    <div class="metric-explain">Can small markets field competitive teams?</div>
+                </div>
+            </div>
+
+            <!-- Overall Status -->
+            <div class="overall-status none" id="overallStatus">
+                ⚖️ Find the balance that works for everyone
             </div>
 
             <!-- Main Dashboard -->
@@ -161,9 +286,8 @@
                         </label>
                         <input type="range" id="sharingSlider" class="slider" min="0" max="100" value="0" step="1">
                         <div class="slider-labels">
-                            <span>0%</span>
-                            <span>50%</span>
-                            <span>100%</span>
+                            <span>0% (No sharing)</span>
+                            <span>100% (Full pool)</span>
                         </div>
                     </div>
 
@@ -178,7 +302,7 @@
                             </button>
                         </div>
                         <div class="distribution-explainer">
-                            <p id="distributionExplain">Money is split equally among all teams</p>
+                            <p id="distributionExplain">Equal: Every team gets the same share. Simple and fair, but might not help small markets enough.</p>
                         </div>
                     </div>
 
@@ -187,21 +311,13 @@
                             <span class="label-text">Luxury Tax Threshold ($M)</span>
                             <span class="label-value" id="luxuryValue">$150M</span>
                         </label>
-                        <input type="range" id="luxurySlider" class="slider" min="100" max="200" value="150" step="5">
-                    </div>
-
-                    <!-- Fairness Meter -->
-                    <div class="fairness-meter">
-                        <div class="meter-header">
-                            <span>League Fairness Score</span>
-                            <span class="score-value" id="fairnessScore">0%</span>
+                        <input type="range" id="luxurySlider" class="slider luxury-slider" min="100" max="300" value="150" step="10">
+                        <div class="slider-labels">
+                            <span>$100M (Strict)</span>
+                            <span>$300M (Lenient)</span>
                         </div>
-                        <div class="meter-bar">
-                            <div class="meter-fill" id="meterFill" style="width: 0%"></div>
-                            <div class="meter-goal" id="meterGoal" style="left: 70%"></div>
-                        </div>
-                        <div class="meter-status" id="meterStatus">
-                            Keep adjusting to reach your goal!
+                        <div class="luxury-explainer">
+                            Teams above this threshold pay 40% tax that goes to smaller teams
                         </div>
                     </div>
 
@@ -209,11 +325,11 @@
                     <div class="quick-stats">
                         <div class="stat-item">
                             <div class="stat-label">Total League Revenue</div>
-                            <div class="stat-value" id="totalRevenue">$10.0B</div>
+                            <div class="stat-value" id="totalRevenue">$0M</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-label">Revenue Gap</div>
-                            <div class="stat-value" id="revenueGap">$140M</div>
+                            <div class="stat-value" id="revenueGap">$0M</div>
                         </div>
                     </div>
                 </div>
@@ -222,7 +338,7 @@
                 <div class="visualization-panel">
                     <!-- Team Cards -->
                     <div class="teams-container">
-                        <h3 class="section-title">NBA Teams</h3>
+                        <h3 class="section-title">NBA Teams - Watch Their Reactions!</h3>
                         <div class="teams-grid" id="teamsGrid"></div>
                     </div>
 
@@ -240,6 +356,9 @@
                     <div class="confetti"></div>
                     <h2>🎉 Level Complete!</h2>
                     <p class="success-message" id="successMessage"></p>
+                    <div class="lesson-recap">
+                        <p><strong>You learned:</strong> Revenue sharing is about finding the balance where big markets don't feel robbed and small markets can still compete. That's exactly what real commissioners do!</p>
+                    </div>
                     <div class="claim-code-reveal">
                         <div class="code-label">Your Claim Code:</div>
                         <div class="code-box" id="claimCodeBox">
