@@ -427,7 +427,7 @@ function calculateSmallMarketViability(results) {
     // Calculate what percentage of minimum viable they're achieving on average
     const avgViability = smallMarkets.reduce((sum, r) => {
         const viability = (r.finalRevenue / r.minViable) * 100;
-        return sum + Math.min(viability, 120); // Cap at 120% to prevent gaming
+        return sum + Math.min(viability, 100); // Cap at 100% — can't exceed "fully viable"
     }, 0) / smallMarkets.length;
 
     return Math.round(avgViability);
@@ -527,26 +527,29 @@ function getCoachingTip(results, levelConfig, sharingPercent, distributionType) 
 }
 
 /**
- * Get warning message if close to failure
+ * Get warning message if close to or in failure state
+ * Only fires when the condition is NOT met — no false alarms on passing state.
  */
 function getWarningMessage(results, levelConfig) {
     const conditions = checkVictoryConditions(results, levelConfig);
     const warnings = [];
 
-    // Big market warning
-    if (conditions.bigSatisfaction < levelConfig.minBigMarketSatisfaction + 10 &&
-        conditions.bigSatisfaction >= levelConfig.minBigMarketSatisfaction - 5) {
-        warnings.push("⚠️ Big market owners are getting restless...");
-    } else if (conditions.bigSatisfaction < levelConfig.minBigMarketSatisfaction - 5) {
-        warnings.push("🚨 Big markets threaten to vote NO!");
+    // Big market warning — only when condition is NOT met
+    if (!conditions.bigSatisfactionMet) {
+        if (conditions.bigSatisfaction >= levelConfig.minBigMarketSatisfaction - 5) {
+            warnings.push("⚠️ Big market owners are getting restless...");
+        } else {
+            warnings.push("🚨 Big markets threaten to vote NO!");
+        }
     }
 
-    // Small market warning
-    if (conditions.smallViability < levelConfig.minSmallMarketViability + 10 &&
-        conditions.smallViability >= levelConfig.minSmallMarketViability - 5) {
-        warnings.push("⚠️ Small markets are barely surviving...");
-    } else if (conditions.smallViability < levelConfig.minSmallMarketViability - 5) {
-        warnings.push("🚨 Small markets can't field competitive teams!");
+    // Small market warning — only when condition is NOT met
+    if (!conditions.smallViabilityMet) {
+        if (conditions.smallViability >= levelConfig.minSmallMarketViability - 5) {
+            warnings.push("⚠️ Small markets are barely surviving...");
+        } else {
+            warnings.push("🚨 Small markets can't field competitive teams!");
+        }
     }
 
     return warnings;

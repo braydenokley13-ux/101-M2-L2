@@ -537,7 +537,7 @@ function updateCalculations() {
  * Start hold-to-win timer (800ms)
  */
 function startHoldTimer() {
-    if (holdTimer) return; // already running
+    if (holdInterval) return; // already running — holdTimer was never set, use holdInterval as guard
 
     const holdIndicator = document.getElementById('holdIndicator');
     const holdBarFill = document.getElementById('holdBarFill');
@@ -597,8 +597,9 @@ function updateConditionTracker(conditions) {
  * Update parity meter
  */
 function updateParityMeter(score, target, met) {
-    document.getElementById('parityScore').textContent = `${score}%`;
-    document.getElementById('parityFill').style.width = `${Math.min(score, 100)}%`;
+    const displayScore = Math.min(score, 100);
+    document.getElementById('parityScore').textContent = `${displayScore}%`;
+    document.getElementById('parityFill').style.width = `${displayScore}%`;
 
     const indicator = document.getElementById('parityIndicator');
     indicator.className = 'status-indicator ' + (met ? 'status-success' : 'status-fail');
@@ -609,8 +610,9 @@ function updateParityMeter(score, target, met) {
  * Update big market satisfaction meter
  */
 function updateBigMarketMeter(score, target, met) {
-    document.getElementById('bigMarketScore').textContent = `${score}%`;
-    document.getElementById('bigMarketFill').style.width = `${Math.min(score, 100)}%`;
+    const displayScore = Math.min(score, 100);
+    document.getElementById('bigMarketScore').textContent = `${displayScore}%`;
+    document.getElementById('bigMarketFill').style.width = `${displayScore}%`;
 
     const indicator = document.getElementById('bigMarketIndicator');
     indicator.className = 'status-indicator ' + (met ? 'status-success' : 'status-fail');
@@ -621,8 +623,9 @@ function updateBigMarketMeter(score, target, met) {
  * Update small market viability meter
  */
 function updateSmallMarketMeter(score, target, met) {
-    document.getElementById('smallMarketScore').textContent = `${score}%`;
-    document.getElementById('smallMarketFill').style.width = `${Math.min(score, 100)}%`;
+    const displayScore = Math.min(score, 100);
+    document.getElementById('smallMarketScore').textContent = `${displayScore}%`;
+    document.getElementById('smallMarketFill').style.width = `${displayScore}%`;
 
     const indicator = document.getElementById('smallMarketIndicator');
     indicator.className = 'status-indicator ' + (met ? 'status-success' : 'status-fail');
