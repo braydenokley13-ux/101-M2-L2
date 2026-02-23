@@ -82,10 +82,10 @@ function updateChart(results) {
                     labels: {
                         color: '#dfe6e9',
                         font: {
-                            size: 13,
+                            size: 11,
                             weight: 'bold'
                         },
-                        padding: 15,
+                        padding: 8,
                         usePointStyle: true,
                         pointStyle: 'circle'
                     }
@@ -132,7 +132,7 @@ function updateChart(results) {
                     ticks: {
                         color: '#dfe6e9',
                         font: {
-                            size: 11,
+                            size: 10,
                             weight: 'bold'
                         },
                         maxRotation: 45,
@@ -148,26 +148,20 @@ function updateChart(results) {
                     ticks: {
                         color: '#dfe6e9',
                         font: {
-                            size: 12
+                            size: 10
                         },
                         callback: function(value) {
                             return '$' + value + 'M';
                         }
                     },
                     title: {
-                        display: true,
-                        text: 'Team Revenue (Millions)',
-                        color: '#ffeaa7',
-                        font: {
-                            size: 13,
-                            weight: 'bold'
-                        }
+                        display: false
                     }
                 }
             },
             animation: {
-                duration: 400,
-                easing: 'easeInOutQuart'
+                duration: 200,
+                easing: 'easeOutQuart'
             },
             interaction: {
                 intersect: false,
