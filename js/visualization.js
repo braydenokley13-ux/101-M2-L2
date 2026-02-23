@@ -1,47 +1,51 @@
 /**
- * Visualization - Chart.js implementation for revenue comparison
- * OVERHAULED: Now shows team satisfaction indicators
+ * Visualization V2 - Chart.js implementation for revenue comparison
+ *
+ * V2 fix: Uses update-in-place instead of destroy/recreate on every slider change.
+ * This eliminates flicker and provides smooth animated transitions.
  */
 
 let revenueChart = null;
 
 /**
- * Initialize or update the revenue chart
+ * Get market colors for a results array
+ */
+function getMarketColors(results, alpha) {
+    return results.map(team => {
+        switch(team.market) {
+            case 'big': return `rgba(231, 76, 60, ${alpha})`;
+            case 'mid': return `rgba(243, 156, 18, ${alpha})`;
+            case 'small': return `rgba(0, 184, 148, ${alpha})`;
+            default: return `rgba(116, 185, 255, ${alpha})`;
+        }
+    });
+}
+
+/**
+ * Initialize or update the revenue chart (V2: update-in-place)
  */
 function updateChart(results) {
     const ctx = document.getElementById('revenueChart');
     if (!ctx) return;
 
-    // Prepare data
     const labels = results.map(team => team.name);
     const baseRevenues = results.map(team => team.baseRevenue);
     const finalRevenues = results.map(team => team.finalRevenue);
+    const bgColors = getMarketColors(results, 0.8);
+    const borderColors = getMarketColors(results, 1);
 
-    // Colors based on market size
-    const backgroundColors = results.map(team => {
-        switch(team.market) {
-            case 'big': return 'rgba(231, 76, 60, 0.8)';
-            case 'mid': return 'rgba(243, 156, 18, 0.8)';
-            case 'small': return 'rgba(0, 184, 148, 0.8)';
-            default: return 'rgba(116, 185, 255, 0.8)';
-        }
-    });
-
-    const borderColors = results.map(team => {
-        switch(team.market) {
-            case 'big': return 'rgba(231, 76, 60, 1)';
-            case 'mid': return 'rgba(243, 156, 18, 1)';
-            case 'small': return 'rgba(0, 184, 148, 1)';
-            default: return 'rgba(116, 185, 255, 1)';
-        }
-    });
-
-    // Destroy existing chart
     if (revenueChart) {
-        revenueChart.destroy();
+        // Update in place — no destroy/recreate, no flicker
+        revenueChart.data.labels = labels;
+        revenueChart.data.datasets[0].data = baseRevenues;
+        revenueChart.data.datasets[1].data = finalRevenues;
+        revenueChart.data.datasets[1].backgroundColor = bgColors;
+        revenueChart.data.datasets[1].borderColor = borderColors;
+        revenueChart.update('active');
+        return;
     }
 
-    // Create new chart
+    // First-time creation
     revenueChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -58,7 +62,7 @@ function updateChart(results) {
                 {
                     label: 'After Revenue Sharing',
                     data: finalRevenues,
-                    backgroundColor: backgroundColors,
+                    backgroundColor: bgColors,
                     borderColor: borderColors,
                     borderWidth: 2,
                     borderRadius: 5,
@@ -162,7 +166,7 @@ function updateChart(results) {
                 }
             },
             animation: {
-                duration: 500,
+                duration: 400,
                 easing: 'easeInOutQuart'
             },
             interaction: {
@@ -174,10 +178,11 @@ function updateChart(results) {
 }
 
 /**
- * Animate chart update
+ * Destroy chart when switching levels (call before initializeLevel)
  */
-function animateChartUpdate() {
+function destroyChart() {
     if (revenueChart) {
-        revenueChart.update('active');
+        revenueChart.destroy();
+        revenueChart = null;
     }
 }

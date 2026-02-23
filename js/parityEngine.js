@@ -63,7 +63,13 @@ const LEVELS = {
         luxuryTaxEnabled: false,
         claimCode: 'NBA-ROOKIE-2025',
         difficulty: 'Easy',
-        hint: 'Big markets want to keep their money, but small markets need help to survive!'
+        hint: 'Big markets want to keep their money, but small markets need help to survive!',
+        hints: [
+            'Think about what small market teams need to survive. They need enough revenue to afford good players.',
+            'Try setting revenue sharing somewhere between 20% and 40%. That range tends to work well for small teams without making big teams too unhappy.',
+            'Setting revenue sharing to about 30% with equal distribution should satisfy all three conditions!'
+        ],
+        realityFact: 'In the real NBA, teams share about 50% of Basketball Related Income (BRI). Small market teams receive equal shares from the national TV deal (~$150M each), which helps level the playing field.'
     },
     2: {
         name: 'All-Star Challenge',
@@ -77,7 +83,13 @@ const LEVELS = {
         luxuryTaxEnabled: false,
         claimCode: 'NBA-ALLSTAR-2025',
         difficulty: 'Medium',
-        hint: 'Try different distribution methods - equal vs weighted changes who benefits!'
+        hint: 'Try different distribution methods - equal vs weighted changes who benefits!',
+        hints: [
+            'You now have two distribution methods — "Equal" splits evenly, "Market Weighted" gives small markets a bigger share.',
+            'Try "Market Weighted" distribution. It lets you share more without making big markets as unhappy, since smaller teams get proportionally more.',
+            'With "Market Weighted" distribution and about 35-40% sharing, you should hit all three targets!'
+        ],
+        realityFact: 'The real NBA uses a hybrid system: national TV revenue is split equally, while teams keep local TV and gate revenues minus a sharing contribution. Total sharing varies by market — big markets contribute more.'
     },
     3: {
         name: 'Conference Finals',
@@ -91,7 +103,13 @@ const LEVELS = {
         luxuryTaxEnabled: true,
         claimCode: 'NBA-CONFERENCE-2025',
         difficulty: 'Hard',
-        hint: 'Luxury tax takes from the richest teams and redistributes to everyone else.'
+        hint: 'Luxury tax takes from the richest teams and redistributes to everyone else.',
+        hints: [
+            'The luxury tax is a powerful tool — set it LOW (around $150M) to take a lot from Golden State and Chicago and redistribute to small markets.',
+            'Combine a moderate sharing rate (~30%) with a strict luxury tax threshold (~$150-170M). This helps small markets without punishing big markets too much on sharing.',
+            'Try: 30% revenue sharing, Market Weighted, luxury tax at $150M. That combination should hit all three targets!'
+        ],
+        realityFact: 'The NBA\'s luxury tax threshold was ~$165M in 2023-24. Teams over it pay between $1.50 and $4+ for every $1 over the line, scaled by how far over they are. Tax revenue goes to non-taxpaying teams.'
     },
     4: {
         name: 'NBA Finals',
@@ -105,7 +123,13 @@ const LEVELS = {
         luxuryTaxEnabled: true,
         claimCode: 'NBA-FINALS-2025',
         difficulty: 'Very Hard',
-        hint: 'You need to balance all three metrics carefully. Small adjustments matter!'
+        hint: 'You need to balance all three metrics carefully. Small adjustments matter!',
+        hints: [
+            'With 6 teams and tighter targets, every slider position matters more. Start by setting Market Weighted distribution.',
+            'The sweet spot is around 35-45% sharing with Market Weighted distribution. Add a luxury tax around $130-160M to close the parity gap.',
+            'Try: 40% revenue sharing, Market Weighted, luxury tax at $140M. Fine-tune by ±5% from there until all three indicators are green!'
+        ],
+        realityFact: 'The NBA\'s revenue gap between the top team (Golden State: $765M in 2023) and bottom team (OKC: $228M) is enormous — nearly 3.4x. Without revenue sharing, small markets simply couldn\'t compete for top talent.'
     },
     5: {
         name: 'Commissioner Legend',
@@ -119,9 +143,61 @@ const LEVELS = {
         luxuryTaxEnabled: true,
         claimCode: 'NBA-LEGEND-2025',
         difficulty: 'Expert',
-        hint: 'Think like a real commissioner: competition is the product, but you need all owners to agree!'
+        hint: 'Think like a real commissioner: competition is the product, but you need all owners to agree!',
+        hints: [
+            'With 8 teams including 3 big markets, you need Market Weighted distribution — equal sharing will not satisfy small markets at the target parity level.',
+            'High parity (78%) requires generous sharing (~45-55%) and an aggressive luxury tax. The challenge is keeping big markets above 45% satisfaction.',
+            'Try: 50% sharing, Market Weighted, luxury tax at $120M. At this level, tiny adjustments of 1-2% can push you over the line — be precise!'
+        ],
+        realityFact: 'The real NBA Commissioner earns ~$8M/year managing these exact trade-offs across 30 teams. Commissioner Adam Silver negotiated a new CBA in 2023 that increased sharing while adding a second apron rule to limit big spenders.'
     }
 };
+
+// Random Events for Level 4-5
+const RANDOM_EVENTS = [
+    {
+        icon: '⭐',
+        text: 'Breaking News: A superstar free agent just signed a mega deal! His team\'s merchandise sales explode.',
+        teamKey: 'big',
+        revenueChange: +60,
+        impactLabel: '+$60M to a big market team'
+    },
+    {
+        icon: '🏟️',
+        text: 'Breaking News: A small market team just opened a brand-new arena! Local revenue surges.',
+        teamKey: 'small',
+        revenueChange: +40,
+        impactLabel: '+$40M to a small market team'
+    },
+    {
+        icon: '📺',
+        text: 'Breaking News: A new regional TV deal collapses! One team loses a major revenue source.',
+        teamKey: 'mid',
+        revenueChange: -30,
+        impactLabel: '-$30M to a mid market team'
+    },
+    {
+        icon: '🌍',
+        text: 'Breaking News: International expansion! A big market team scores a massive global streaming deal.',
+        teamKey: 'big',
+        revenueChange: +80,
+        impactLabel: '+$80M to a big market team'
+    },
+    {
+        icon: '🏥',
+        text: 'Breaking News: A small market\'s star player gets injured for the season. Ticket sales plummet.',
+        teamKey: 'small',
+        revenueChange: -25,
+        impactLabel: '-$25M to a small market team'
+    },
+    {
+        icon: '🎟️',
+        text: 'Breaking News: A small market team makes a surprise playoff run! Attendance and revenue spike.',
+        teamKey: 'small',
+        revenueChange: +35,
+        impactLabel: '+$35M to a small market team'
+    }
+];
 
 // Special Achievement Codes
 const ACHIEVEMENT_CODES = {
@@ -518,4 +594,39 @@ function calculateRevenueGap(results) {
  */
 function calculateFairnessScore(results) {
     return calculateParityScore(results);
+}
+
+/**
+ * Get revenue breakdown for the math panel
+ * Returns per-team rows showing each step
+ */
+function getRevenueBreakdown(results) {
+    return results.map(team => ({
+        name: team.name,
+        base: team.baseRevenue,
+        shared: -(team.baseRevenue - team.afterSharing),
+        received: team.redistribution,
+        luxTax: -team.luxuryTaxPaid,
+        luxRcvd: team.luxuryTaxReceived,
+        final: team.finalRevenue
+    }));
+}
+
+/**
+ * Check if close to solution (all unmet metrics within threshold%)
+ */
+function isNearSolution(results, levelConfig, threshold = 6) {
+    const conditions = checkVictoryConditions(results, levelConfig);
+    if (conditions.allMet) return false;
+
+    const parityGap = levelConfig.targetParity - conditions.parity;
+    const bigGap = levelConfig.minBigMarketSatisfaction - conditions.bigSatisfaction;
+    const smallGap = levelConfig.minSmallMarketViability - conditions.smallViability;
+
+    const unmetGaps = [];
+    if (!conditions.parityMet) unmetGaps.push(parityGap);
+    if (!conditions.bigSatisfactionMet) unmetGaps.push(bigGap);
+    if (!conditions.smallViabilityMet) unmetGaps.push(smallGap);
+
+    return unmetGaps.every(gap => gap <= threshold && gap > 0);
 }

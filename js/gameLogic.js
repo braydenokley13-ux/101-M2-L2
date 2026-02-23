@@ -1,11 +1,20 @@
 /**
- * Game Logic - Handles game state, progression, and user interaction
- * OVERHAULED: Now requires balancing three stakeholder groups
+ * Game Logic V2 - Handles game state, progression, and user interaction
  *
- * Key Lesson Concepts:
- * - Big markets say "We earned this, why subsidize competition?"
- * - Small markets need enough revenue to compete
- * - Competition is the product - the league needs both sides happy
+ * V2 additions:
+ * - Debounced slider updates
+ * - Hold-to-win (prevent accidental triggers)
+ * - Undo/Reset with 10-step history
+ * - Progressive hint system
+ * - Sandbox mode
+ * - Math panel renderer
+ * - Random events (Level 4-5)
+ * - Save/restore last slider positions per level
+ * - Toast notifications
+ * - Confetti particles
+ * - Threshold markers
+ * - Condition tracker pills
+ * - Near-solution detection
  */
 
 // Game State
@@ -17,6 +26,18 @@ let distributionType = 'equal';
 let luxuryTaxThreshold = 150;
 let tutorialStep = 0;
 let hasShownVictory = false;
+let isSandboxMode = false;
+
+// V2 State
+let historyStack = [];
+let hintLevel = 0;
+let holdTimer = null;
+let holdProgress = 0;
+let holdInterval = null;
+let randomEventTimer = null;
+let randomEventActive = false;
+let eventRevenueDelta = { teamName: null, delta: 0 };
+let debounceTimer = null;
 
 // Progress tracking (stored in localStorage)
 const STORAGE_KEY = 'nba_commissioner_progress';
@@ -28,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadProgress();
     updateLevelCards();
     updateClaimCodes();
+    updateProgressOverview();
 });
 
 /**
@@ -39,10 +61,10 @@ function loadProgress() {
         try {
             return JSON.parse(saved);
         } catch (e) {
-            return { completedLevels: [] };
+            return { completedLevels: [], lastSettings: {} };
         }
     }
-    return { completedLevels: [] };
+    return { completedLevels: [], lastSettings: {} };
 }
 
 /**
@@ -53,7 +75,92 @@ function saveProgress(levelNumber) {
     if (!progress.completedLevels.includes(levelNumber)) {
         progress.completedLevels.push(levelNumber);
     }
+    // Save last settings for this level
+    if (!progress.lastSettings) progress.lastSettings = {};
+    progress.lastSettings[levelNumber] = {
+        sharing: sharingPercent,
+        distribution: distributionType,
+        luxuryTax: luxuryTaxThreshold
+    };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+}
+
+/**
+ * Save current slider settings without marking level complete
+ */
+function saveCurrentSettings() {
+    const progress = loadProgress();
+    if (!progress.lastSettings) progress.lastSettings = {};
+    progress.lastSettings[currentLevel] = {
+        sharing: sharingPercent,
+        distribution: distributionType,
+        luxuryTax: luxuryTaxThreshold
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+}
+
+/**
+ * Reset all progress (from UI)
+ */
+function resetAllProgress() {
+    if (confirm('Reset all progress? This will clear all completed levels and codes.')) {
+        localStorage.removeItem(STORAGE_KEY);
+        updateLevelCards();
+        updateClaimCodes();
+        updateProgressOverview();
+        showToast('Progress reset!', 'success');
+    }
+}
+
+/**
+ * Update the progress overview bar on level select
+ */
+function updateProgressOverview() {
+    const progress = loadProgress();
+    const count = progress.completedLevels.length;
+    const pct = (count / 5) * 100;
+    const fill = document.getElementById('progressFill');
+    const label = document.getElementById('progressLabel');
+    if (fill) fill.style.width = pct + '%';
+    if (label) label.textContent = `${count} / 5 Levels Complete`;
+}
+
+/**
+ * Start sandbox mode
+ */
+function startSandbox() {
+    isSandboxMode = true;
+    currentLevel = 5;
+    currentConfig = Object.assign({}, LEVELS[5], {
+        allowDistributionChoice: true,
+        luxuryTaxEnabled: true,
+        targetParity: 0,
+        minBigMarketSatisfaction: 0,
+        minSmallMarketViability: 0
+    });
+    hasShownVictory = false;
+    historyStack = [];
+    hintLevel = 0;
+
+    sharingPercent = 0;
+    distributionType = 'equal';
+    luxuryTaxThreshold = 150;
+
+    document.getElementById('levelSelect').classList.add('hidden');
+    document.getElementById('gameScreen').classList.remove('hidden');
+
+    document.getElementById('currentLevelName').textContent = 'Sandbox Mode — Free Explore';
+    document.getElementById('levelDifficulty').textContent = 'No Goals';
+    document.getElementById('sandboxTag').classList.remove('hidden');
+
+    // Show all controls
+    document.getElementById('distributionControl').style.display = 'block';
+    document.getElementById('luxuryTaxControl').style.display = 'block';
+
+    // Hide hint btn in sandbox (no need)
+    document.getElementById('hintBtn').style.display = 'none';
+
+    initializeLevel(true);
 }
 
 /**
@@ -64,27 +171,39 @@ function startLevel(levelNumber) {
 
     // Check if level is unlocked
     if (levelNumber > 1 && !progress.completedLevels.includes(levelNumber - 1)) {
-        alert(`Complete Level ${levelNumber - 1} first!`);
+        showToast(`Complete Level ${levelNumber - 1} first!`, 'error');
         return;
     }
 
+    isSandboxMode = false;
     currentLevel = levelNumber;
     currentConfig = LEVELS[levelNumber];
     hasShownVictory = false;
+    historyStack = [];
+    hintLevel = 0;
+
+    // Restore last settings for this level if available
+    const lastSettings = progress.lastSettings && progress.lastSettings[levelNumber];
+    if (lastSettings) {
+        sharingPercent = lastSettings.sharing || 0;
+        distributionType = lastSettings.distribution || currentConfig.defaultDistribution;
+        luxuryTaxThreshold = lastSettings.luxuryTax || 150;
+    } else {
+        sharingPercent = 0;
+        distributionType = currentConfig.defaultDistribution;
+        luxuryTaxThreshold = 150;
+    }
 
     // Hide level select, show game screen
     document.getElementById('levelSelect').classList.add('hidden');
     document.getElementById('gameScreen').classList.remove('hidden');
 
-    // Reset controls
-    sharingPercent = 0;
-    distributionType = currentConfig.defaultDistribution;
-    luxuryTaxThreshold = 150;
+    document.getElementById('sandboxTag').classList.add('hidden');
+    document.getElementById('hintBtn').style.display = '';
 
-    // Initialize UI
-    initializeLevel();
+    initializeLevel(false);
 
-    // Show tutorial for level 1
+    // Show tutorial for level 1 (only if never completed)
     if (levelNumber === 1 && !progress.completedLevels.includes(1)) {
         showTutorial();
     }
@@ -93,26 +212,52 @@ function startLevel(levelNumber) {
 /**
  * Initialize level UI
  */
-function initializeLevel() {
+function initializeLevel(isSandbox) {
+    // Reset victory/event state
+    hasShownVictory = false;
+    clearHoldTimer();
+    clearRandomEventTimer();
+    randomEventActive = false;
+    eventRevenueDelta = { teamName: null, delta: 0 };
+
+    // Reset hint display
+    hintLevel = 0;
+    const hintBox = document.getElementById('hintBox');
+    const hintBtn = document.getElementById('hintBtn');
+    if (hintBox) hintBox.classList.add('hidden');
+    if (hintBtn) {
+        hintBtn.textContent = '💡 Need a Hint?';
+        hintBtn.classList.remove('exhausted');
+    }
+
     // Update level info
-    document.getElementById('currentLevelName').textContent = `Level ${currentLevel}: ${currentConfig.name}`;
-    document.getElementById('levelDifficulty').textContent = currentConfig.difficulty;
+    document.getElementById('currentLevelName').textContent =
+        isSandbox ? 'Sandbox Mode — Free Explore' : `Level ${currentLevel}: ${currentConfig.name}`;
+    document.getElementById('levelDifficulty').textContent = isSandbox ? 'No Goals' : currentConfig.difficulty;
 
     // Update goal displays
     document.getElementById('goalParity').textContent = currentConfig.targetParity;
     document.getElementById('goalBigMarket').textContent = currentConfig.minBigMarketSatisfaction;
     document.getElementById('goalSmallMarket').textContent = currentConfig.minSmallMarketViability;
 
+    // Set threshold markers
+    setThresholdMarker('parityThreshold', currentConfig.targetParity);
+    setThresholdMarker('bigMarketThreshold', currentConfig.minBigMarketSatisfaction);
+    setThresholdMarker('smallMarketThreshold', currentConfig.minSmallMarketViability);
+
+    // Update undo button state
+    updateUndoButton();
+
     // Set up controls
     const sharingSlider = document.getElementById('sharingSlider');
-    sharingSlider.value = 0;
-    document.getElementById('sharingValue').textContent = '0%';
+    sharingSlider.value = sharingPercent;
+    document.getElementById('sharingValue').textContent = `${sharingPercent}%`;
 
     // Distribution control
     const distributionControl = document.getElementById('distributionControl');
-    if (currentConfig.allowDistributionChoice) {
+    if (currentConfig.allowDistributionChoice || isSandbox) {
         distributionControl.style.display = 'block';
-        setDistribution(currentConfig.defaultDistribution);
+        setDistribution(distributionType, false);
     } else {
         distributionControl.style.display = 'none';
         distributionType = currentConfig.defaultDistribution;
@@ -120,10 +265,10 @@ function initializeLevel() {
 
     // Luxury tax control
     const luxuryControl = document.getElementById('luxuryTaxControl');
-    if (currentConfig.luxuryTaxEnabled) {
+    if (currentConfig.luxuryTaxEnabled || isSandbox) {
         luxuryControl.style.display = 'block';
-        document.getElementById('luxurySlider').value = 150;
-        document.getElementById('luxuryValue').textContent = '$150M';
+        document.getElementById('luxurySlider').value = luxuryTaxThreshold;
+        document.getElementById('luxuryValue').textContent = `$${luxuryTaxThreshold}M`;
     } else {
         luxuryControl.style.display = 'none';
     }
@@ -138,30 +283,64 @@ function initializeLevel() {
 
     // Initial calculation
     updateCalculations();
+
+    // Start random event timer for levels 4-5 (not sandbox)
+    if (!isSandboxMode && currentLevel >= 4) {
+        startRandomEventTimer();
+    }
+}
+
+/**
+ * Set threshold marker position
+ */
+function setThresholdMarker(markerId, targetPct) {
+    const marker = document.getElementById(markerId);
+    if (marker) {
+        if (targetPct > 0) {
+            marker.style.left = `${Math.min(targetPct, 98)}%`;
+            marker.style.display = 'block';
+        } else {
+            marker.style.display = 'none';
+        }
+    }
 }
 
 /**
  * Handle sharing slider change
  */
 function handleSharingChange(e) {
+    pushHistory();
     sharingPercent = parseInt(e.target.value);
     document.getElementById('sharingValue').textContent = `${sharingPercent}%`;
-    updateCalculations();
+    debouncedUpdate();
 }
 
 /**
  * Handle luxury tax slider change
  */
 function handleLuxuryChange(e) {
+    pushHistory();
     luxuryTaxThreshold = parseInt(e.target.value);
     document.getElementById('luxuryValue').textContent = `$${luxuryTaxThreshold}M`;
-    updateCalculations();
+    debouncedUpdate();
+}
+
+/**
+ * Debounced calculation update
+ */
+function debouncedUpdate() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        updateCalculations();
+        saveCurrentSettings();
+    }, 50);
 }
 
 /**
  * Set distribution type
  */
-function setDistribution(type) {
+function setDistribution(type, pushHist = true) {
+    if (pushHist) pushHistory();
     distributionType = type;
 
     // Update button states
@@ -175,17 +354,125 @@ function setDistribution(type) {
     // Update explanation
     document.getElementById('distributionExplain').textContent = getDistributionExplanation(type);
 
+    debouncedUpdate();
+}
+
+/**
+ * Push current state to undo history
+ */
+function pushHistory() {
+    historyStack.push({
+        sharing: sharingPercent,
+        distribution: distributionType,
+        luxuryTax: luxuryTaxThreshold
+    });
+    if (historyStack.length > 10) historyStack.shift();
+    updateUndoButton();
+}
+
+/**
+ * Undo last action
+ */
+function undoLastAction() {
+    if (historyStack.length === 0) return;
+    const prev = historyStack.pop();
+    sharingPercent = prev.sharing;
+    distributionType = prev.distribution;
+    luxuryTaxThreshold = prev.luxuryTax;
+
+    // Update UI controls
+    document.getElementById('sharingSlider').value = sharingPercent;
+    document.getElementById('sharingValue').textContent = `${sharingPercent}%`;
+    document.getElementById('luxurySlider').value = luxuryTaxThreshold;
+    document.getElementById('luxuryValue').textContent = `$${luxuryTaxThreshold}M`;
+    setDistribution(distributionType, false);
+
+    updateUndoButton();
     updateCalculations();
+}
+
+/**
+ * Reset current level to defaults
+ */
+function resetLevel() {
+    historyStack = [];
+    sharingPercent = 0;
+    distributionType = currentConfig.defaultDistribution;
+    luxuryTaxThreshold = 150;
+    hintLevel = 0;
+
+    document.getElementById('sharingSlider').value = 0;
+    document.getElementById('sharingValue').textContent = '0%';
+    document.getElementById('luxurySlider').value = 150;
+    document.getElementById('luxuryValue').textContent = '$150M';
+    setDistribution(distributionType, false);
+
+    const hintBox = document.getElementById('hintBox');
+    const hintBtn = document.getElementById('hintBtn');
+    if (hintBox) hintBox.classList.add('hidden');
+    if (hintBtn) {
+        hintBtn.textContent = '💡 Need a Hint?';
+        hintBtn.classList.remove('exhausted');
+    }
+
+    updateUndoButton();
+    updateCalculations();
+    showToast('Level reset!', 'success');
+}
+
+/**
+ * Update undo button enabled state
+ */
+function updateUndoButton() {
+    const btn = document.getElementById('undoBtn');
+    if (btn) btn.disabled = historyStack.length === 0;
+}
+
+/**
+ * Show next hint tier
+ */
+function showNextHint() {
+    if (isSandboxMode) return;
+    const hints = currentConfig.hints;
+    if (!hints || hintLevel >= hints.length) return;
+
+    const hintBox = document.getElementById('hintBox');
+    const hintBtn = document.getElementById('hintBtn');
+    const hintTierLabel = document.getElementById('hintTierLabel');
+    const hintText = document.getElementById('hintText');
+
+    hintText.textContent = hints[hintLevel];
+    hintTierLabel.textContent = `Hint ${hintLevel + 1} of ${hints.length}`;
+    hintBox.classList.remove('hidden');
+
+    hintLevel++;
+
+    if (hintLevel >= hints.length) {
+        hintBtn.textContent = '💡 All Hints Shown';
+        hintBtn.classList.add('exhausted');
+    } else {
+        hintBtn.textContent = `💡 Show More (${hintLevel + 1}/${hints.length})`;
+    }
 }
 
 /**
  * Update all calculations and UI
  */
 function updateCalculations() {
+    // Apply any active event delta
+    let teamsToUse = currentConfig.teams;
+    if (eventRevenueDelta.teamName) {
+        teamsToUse = currentConfig.teams.map(t =>
+            t.name === eventRevenueDelta.teamName
+                ? Object.assign({}, t, { baseRevenue: t.baseRevenue + eventRevenueDelta.delta })
+                : t
+        );
+    }
+
     // Calculate revenue sharing
     const luxuryTax = currentConfig.luxuryTaxEnabled ? luxuryTaxThreshold : 0;
     currentResults = calculateRevenueSharing(
-        currentConfig.teams,
+        teamsToUse,
         sharingPercent,
         distributionType,
         luxuryTax
@@ -199,12 +486,16 @@ function updateCalculations() {
     updateBigMarketMeter(conditions.bigSatisfaction, currentConfig.minBigMarketSatisfaction, conditions.bigSatisfactionMet);
     updateSmallMarketMeter(conditions.smallViability, currentConfig.minSmallMarketViability, conditions.smallViabilityMet);
 
+    // Update condition tracker pills
+    updateConditionTracker(conditions);
+
     // Update overall status
     updateOverallStatus(conditions);
 
     // Update coach message
     const tip = getCoachingTip(currentResults, currentConfig, sharingPercent, distributionType);
-    document.getElementById('coachMessage').textContent = tip;
+    document.getElementById('coachMessage').textContent =
+        isSandboxMode ? '🧪 Sandbox mode: explore freely! No win conditions. Try all the sliders!' : tip;
 
     // Update warning messages
     updateWarnings(currentResults, currentConfig);
@@ -221,11 +512,84 @@ function updateCalculations() {
     // Update chart
     updateChart(currentResults);
 
-    // Check if level complete
-    if (conditions.allMet && !hasShownVictory) {
-        hasShownVictory = true;
-        setTimeout(() => showSuccess(), 1000);
+    // Update math panel
+    renderMathPanel(currentResults);
+
+    // Check near-solution
+    if (!isSandboxMode && !conditions.allMet) {
+        const near = isNearSolution(currentResults, currentConfig);
+        if (near) {
+            const statusEl = document.getElementById('overallStatus');
+            statusEl.classList.add('near-solution');
+        }
     }
+
+    // Check if level complete (hold-to-win)
+    if (!isSandboxMode && conditions.allMet && !hasShownVictory) {
+        startHoldTimer();
+    } else if (!conditions.allMet) {
+        clearHoldTimer();
+    }
+}
+
+/**
+ * Start hold-to-win timer (800ms)
+ */
+function startHoldTimer() {
+    if (holdTimer) return; // already running
+
+    const holdIndicator = document.getElementById('holdIndicator');
+    const holdBarFill = document.getElementById('holdBarFill');
+    if (holdIndicator) holdIndicator.classList.remove('hidden');
+
+    const duration = 800;
+    const step = 30;
+    holdProgress = 0;
+
+    holdInterval = setInterval(() => {
+        holdProgress += step;
+        const pct = Math.min((holdProgress / duration) * 100, 100);
+        if (holdBarFill) holdBarFill.style.width = pct + '%';
+
+        if (holdProgress >= duration) {
+            clearHoldTimer();
+            hasShownVictory = true;
+            setTimeout(() => showSuccess(), 200);
+        }
+    }, step);
+}
+
+/**
+ * Clear hold-to-win timer
+ */
+function clearHoldTimer() {
+    if (holdInterval) {
+        clearInterval(holdInterval);
+        holdInterval = null;
+    }
+    holdTimer = null;
+    holdProgress = 0;
+    const holdIndicator = document.getElementById('holdIndicator');
+    const holdBarFill = document.getElementById('holdBarFill');
+    if (holdIndicator) holdIndicator.classList.add('hidden');
+    if (holdBarFill) holdBarFill.style.width = '0%';
+}
+
+/**
+ * Update condition tracker pills
+ */
+function updateConditionTracker(conditions) {
+    const pills = {
+        condParity: conditions.parityMet,
+        condBig: conditions.bigSatisfactionMet,
+        condSmall: conditions.smallViabilityMet
+    };
+    Object.entries(pills).forEach(([id, met]) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.className = 'condition-pill ' + (met ? 'met' : 'unmet');
+        }
+    });
 }
 
 /**
@@ -271,8 +635,13 @@ function updateOverallStatus(conditions) {
     const statusEl = document.getElementById('overallStatus');
     const metCount = [conditions.parityMet, conditions.bigSatisfactionMet, conditions.smallViabilityMet].filter(x => x).length;
 
-    if (conditions.allMet) {
-        statusEl.textContent = '🎉 ALL STAKEHOLDERS APPROVE!';
+    statusEl.classList.remove('near-solution');
+
+    if (isSandboxMode) {
+        statusEl.textContent = '🧪 Sandbox Mode — Explore Freely!';
+        statusEl.className = 'overall-status partial';
+    } else if (conditions.allMet) {
+        statusEl.textContent = '🎉 ALL STAKEHOLDERS APPROVE! Hold steady...';
         statusEl.className = 'overall-status victory';
     } else if (metCount === 2) {
         statusEl.textContent = `✨ Almost there! ${metCount}/3 conditions met`;
@@ -293,7 +662,7 @@ function updateWarnings(results, levelConfig) {
     const warnings = getWarningMessage(results, levelConfig);
     const warningContainer = document.getElementById('warningMessages');
 
-    if (warnings.length > 0) {
+    if (warnings.length > 0 && !isSandboxMode) {
         warningContainer.innerHTML = warnings.map(w => `<div class="warning-item">${w}</div>`).join('');
         warningContainer.style.display = 'block';
     } else {
@@ -315,10 +684,12 @@ function updateTeamCards(results) {
         const changeClass = team.change >= 0 ? 'positive' : 'negative';
         const changeSymbol = team.change >= 0 ? '+' : '';
 
-        // Satisfaction bar color based on level
         let satisfactionClass = 'sat-low';
         if (team.satisfaction >= 70) satisfactionClass = 'sat-high';
         else if (team.satisfaction >= 50) satisfactionClass = 'sat-mid';
+
+        const sharedOut = Math.round(team.baseRevenue * (sharingPercent / 100) * 10) / 10;
+        const received = team.redistribution;
 
         card.innerHTML = `
             <div class="team-header">
@@ -333,7 +704,10 @@ function updateTeamCards(results) {
                 <div class="revenue-value">$${team.finalRevenue}M</div>
             </div>
             <div class="revenue-change ${changeClass}">
-                ${changeSymbol}$${Math.abs(team.change)}M
+                ${changeSymbol}$${Math.abs(team.change)}M from base
+            </div>
+            <div class="revenue-breakdown">
+                Base $${team.baseRevenue}M → Shared -$${sharedOut}M → Rcvd +$${received}M${team.luxuryTaxPaid > 0 ? ` → Tax -$${team.luxuryTaxPaid}M` : ''}${team.luxuryTaxReceived > 0 ? ` → +$${team.luxuryTaxReceived}M` : ''}
             </div>
             <div class="satisfaction-bar-container">
                 <div class="satisfaction-bar ${satisfactionClass}" style="width: ${team.satisfaction}%"></div>
@@ -346,33 +720,96 @@ function updateTeamCards(results) {
 }
 
 /**
+ * Render the math breakdown table
+ */
+function renderMathPanel(results) {
+    const tbody = document.getElementById('mathTableBody');
+    if (!tbody) return;
+
+    const breakdown = getRevenueBreakdown(results);
+    tbody.innerHTML = breakdown.map(row => `
+        <tr>
+            <td>${row.name}</td>
+            <td>$${row.base}M</td>
+            <td class="negative">${row.shared !== 0 ? '-$' + Math.abs(row.shared).toFixed(1) + 'M' : '—'}</td>
+            <td class="positive">+$${row.received.toFixed(1)}M</td>
+            <td class="${row.luxTax !== 0 ? 'negative' : ''}">${row.luxTax !== 0 ? '-$' + Math.abs(row.luxTax).toFixed(1) + 'M' : '—'}</td>
+            <td class="${row.luxRcvd !== 0 ? 'positive' : ''}">${row.luxRcvd !== 0 ? '+$' + row.luxRcvd.toFixed(1) + 'M' : '—'}</td>
+            <td class="final-col">$${row.final}M</td>
+        </tr>
+    `).join('');
+}
+
+/**
  * Show success modal
  */
 function showSuccess() {
-    // Only show once per level completion
     const modal = document.getElementById('successModal');
     if (!modal.classList.contains('hidden')) return;
 
-    // Save progress
     saveProgress(currentLevel);
+    updateProgressOverview();
 
-    // Get claim code
     const claimCode = currentConfig.claimCode;
-
-    // Get final conditions
     const conditions = checkVictoryConditions(currentResults, currentConfig);
 
-    // Update modal content
     document.getElementById('successMessage').textContent =
         `You achieved ${conditions.parity}% parity while keeping all stakeholders happy! That's real commissioner work!`;
     document.getElementById('claimCodeText').textContent = claimCode;
 
-    // Show modal
+    // Show reality fact
+    const realityText = document.getElementById('realityText');
+    const realityCompare = document.getElementById('realityCompare');
+    if (currentConfig.realityFact) {
+        realityText.textContent = currentConfig.realityFact;
+        realityCompare.style.display = 'block';
+    } else {
+        realityCompare.style.display = 'none';
+    }
+
     modal.classList.remove('hidden');
 
-    // Update UI
+    // Launch confetti
+    launchConfetti();
+
     updateLevelCards();
     updateClaimCodes();
+}
+
+/**
+ * Launch confetti particles
+ */
+function launchConfetti() {
+    const container = document.getElementById('confettiContainer');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const colors = ['#f39c12', '#e74c3c', '#00b894', '#74b9ff', '#a29bfe', '#ffeaa7', '#fd79a8'];
+    const count = 50;
+
+    for (let i = 0; i < count; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'confetti-particle';
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const left = Math.random() * 100;
+        const duration = 1.5 + Math.random() * 2;
+        const delay = Math.random() * 0.8;
+        const size = 6 + Math.floor(Math.random() * 8);
+
+        particle.style.cssText = `
+            left: ${left}vw;
+            background: ${color};
+            width: ${size}px;
+            height: ${size}px;
+            animation-duration: ${duration}s;
+            animation-delay: ${delay}s;
+            border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+        `;
+
+        document.body.appendChild(particle);
+
+        setTimeout(() => particle.remove(), (duration + delay) * 1000 + 200);
+    }
 }
 
 /**
@@ -380,13 +817,7 @@ function showSuccess() {
  */
 function closeSuccessModal() {
     document.getElementById('successModal').classList.add('hidden');
-
-    // Go to next level or back to menu
-    if (currentLevel < 5) {
-        backToLevels();
-    } else {
-        backToLevels();
-    }
+    backToLevels();
 }
 
 /**
@@ -398,7 +829,11 @@ function retryLevel() {
     sharingPercent = 0;
     distributionType = currentConfig.defaultDistribution;
     luxuryTaxThreshold = 150;
-    initializeLevel();
+    historyStack = [];
+    hintLevel = 0;
+    document.getElementById('sharingSlider').value = 0;
+    document.getElementById('luxurySlider').value = 150;
+    initializeLevel(isSandboxMode);
 }
 
 /**
@@ -420,10 +855,15 @@ function copyClaimCode() {
  * Back to level selection
  */
 function backToLevels() {
+    clearRandomEventTimer();
+    clearHoldTimer();
+    isSandboxMode = false;
+    destroyChart();
     document.getElementById('gameScreen').classList.add('hidden');
     document.getElementById('levelSelect').classList.remove('hidden');
     updateLevelCards();
     updateClaimCodes();
+    updateProgressOverview();
 }
 
 /**
@@ -436,14 +876,12 @@ function updateLevelCards() {
         const card = document.querySelector(`.level-card[data-level="${i}"]`);
         const completeBadge = document.getElementById(`level${i}Complete`);
 
-        // Unlock levels
         if (i === 1 || progress.completedLevels.includes(i - 1)) {
             card.classList.remove('locked');
         } else {
             card.classList.add('locked');
         }
 
-        // Show completion
         if (progress.completedLevels.includes(i)) {
             card.classList.add('completed');
             completeBadge.style.display = 'block';
@@ -460,7 +898,6 @@ function updateLevelCards() {
 function updateClaimCodes() {
     const progress = loadProgress();
 
-    // Individual level codes
     for (let i = 1; i <= 5; i++) {
         const codeCard = document.getElementById(`code${i}`);
         const codeValue = codeCard.querySelector('.code-value');
@@ -472,7 +909,6 @@ function updateClaimCodes() {
         }
     }
 
-    // 3 Levels Bonus
     if (progress.completedLevels.length >= 3) {
         const code3Card = document.getElementById('code3bonus');
         const code3Value = code3Card.querySelector('.code-value');
@@ -481,7 +917,6 @@ function updateClaimCodes() {
         code3Card.classList.add('unlocked');
     }
 
-    // 5 Levels Master Bonus
     if (progress.completedLevels.length >= 5) {
         const code5Card = document.getElementById('code5bonus');
         const code5Value = code5Card.querySelector('.code-value');
@@ -492,15 +927,115 @@ function updateClaimCodes() {
 }
 
 /**
- * Tutorial System for Level 1 - Now explains the trade-off system
+ * Show a toast notification
  */
+function showToast(message, type = '') {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+    });
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 2500);
+}
+
+/* ============================================================
+ * RANDOM EVENTS SYSTEM (Level 4-5)
+ * ============================================================ */
+
+function startRandomEventTimer() {
+    clearRandomEventTimer();
+    // Fire a random event every 45 seconds
+    randomEventTimer = setTimeout(() => {
+        if (!hasShownVictory && !randomEventActive) {
+            triggerRandomEvent();
+        }
+    }, 45000);
+}
+
+function clearRandomEventTimer() {
+    if (randomEventTimer) {
+        clearTimeout(randomEventTimer);
+        randomEventTimer = null;
+    }
+}
+
+function triggerRandomEvent() {
+    if (randomEventActive) return;
+    randomEventActive = true;
+
+    const event = RANDOM_EVENTS[Math.floor(Math.random() * RANDOM_EVENTS.length)];
+
+    // Find a team matching the market type
+    const matchingTeams = currentConfig.teams.filter(t => t.market === event.teamKey);
+    if (matchingTeams.length === 0) {
+        randomEventActive = false;
+        startRandomEventTimer();
+        return;
+    }
+    const targetTeam = matchingTeams[Math.floor(Math.random() * matchingTeams.length)];
+
+    // Show event modal
+    document.getElementById('eventIcon').textContent = event.icon;
+    document.getElementById('eventText').textContent = event.text.replace(
+        /a (big|small|mid) market team/i, targetTeam.name
+    );
+
+    const impactEl = document.getElementById('eventImpact');
+    impactEl.textContent = event.impactLabel.replace(
+        /a (big|small|mid) market team/i, targetTeam.name
+    );
+    impactEl.className = 'event-impact ' +
+        (event.revenueChange > 0 ? 'positive-impact' : 'negative-impact');
+
+    // Reset event bar animation
+    const barFill = document.getElementById('eventBarFill');
+    if (barFill) {
+        barFill.style.animation = 'none';
+        barFill.offsetHeight; // reflow
+        barFill.style.animation = '';
+    }
+
+    const modal = document.getElementById('randomEventModal');
+    modal.classList.remove('hidden');
+
+    // Apply the delta and recalculate after 3.5s
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        eventRevenueDelta = { teamName: targetTeam.name, delta: event.revenueChange };
+        updateCalculations();
+        showToast(`📢 ${targetTeam.name} revenue changed by ${event.revenueChange > 0 ? '+' : ''}$${event.revenueChange}M!`, event.revenueChange > 0 ? 'success' : 'error');
+
+        // Revert after 30 seconds
+        setTimeout(() => {
+            eventRevenueDelta = { teamName: null, delta: 0 };
+            updateCalculations();
+            randomEventActive = false;
+            // Schedule next event
+            if (!hasShownVictory) startRandomEventTimer();
+        }, 30000);
+    }, 3800);
+}
+
+/* ============================================================
+ * TUTORIAL SYSTEM
+ * ============================================================ */
 const tutorialSteps = [
     "Welcome, Commissioner! In the NBA, you're responsible for making sure the league stays competitive AND profitable.",
     "Here's the challenge: Big market teams (like LA Lakers) make WAY more money than small market teams (like Memphis). Their local TV deals alone can be worth more than a small team's entire budget!",
     "But here's the catch: if small markets can't compete, fans lose interest. As the lesson says: 'Competition is the product. Without it, leagues collapse.'",
-    "Your tool is REVENUE SHARING - you take some money from all teams and redistribute it. BUT... big market owners will complain: 'We earned this, why subsidize our competition?'",
+    "Your tool is REVENUE SHARING — you take some money from all teams and redistribute it. BUT... big market owners will complain: 'We earned this, why subsidize our competition?'",
     "You need to balance THREE things: 1) League Parity (fairness between teams), 2) Big Market Satisfaction (they need to approve!), and 3) Small Market Survival (they need enough to compete).",
-    "The sweet spot is narrow! Too much sharing makes big markets angry. Too little, and small markets can't survive. Find the balance - that's commissioner work!"
+    "Watch the gold markers on each bar — that's your goal line! Get the bars past the marker and the pill at the top turns green. Hit all three green and you win!"
 ];
 
 function showTutorial() {

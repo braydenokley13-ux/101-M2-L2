@@ -5,6 +5,11 @@
     box-sizing: border-box;
 }
 
+/* General utility */
+.hidden {
+    display: none !important;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -510,8 +515,9 @@ body {
     height: 20px;
     background: #2d3436;
     border-radius: 10px;
-    overflow: hidden;
     margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
 }
 
 .metric-bar {
@@ -1208,5 +1214,515 @@ body {
 
     .teams-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ===== V2 ADDITIONS ===== */
+
+/* Progress Overview on Level Select */
+.progress-overview {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    background: rgba(0,0,0,0.3);
+    padding: 15px 25px;
+    border-radius: 12px;
+}
+
+.progress-track {
+    flex: 1;
+    height: 12px;
+    background: #2d3436;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00b894, #00cec9);
+    border-radius: 6px;
+    transition: width 0.5s ease;
+}
+
+.progress-label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffeaa7;
+    white-space: nowrap;
+}
+
+/* Sandbox Section */
+.sandbox-section {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.sandbox-btn {
+    background: linear-gradient(135deg, #0f3460 0%, #533483 100%);
+    color: #a29bfe;
+    border: 2px solid #a29bfe;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sandbox-btn:hover {
+    background: linear-gradient(135deg, #533483 0%, #6c5ce7 100%);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
+}
+
+/* Sandbox Tag in Level Bar */
+.sandbox-tag {
+    display: inline-block;
+    background: #6c5ce7;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+/* Condition Tracker Pills */
+.condition-tracker {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.condition-pill {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    background: rgba(99, 110, 114, 0.4);
+    color: #b2bec3;
+    border: 2px solid #636e72;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.condition-pill.met {
+    background: rgba(0, 184, 148, 0.3);
+    color: #00b894;
+    border-color: #00b894;
+}
+
+.condition-pill.met::before {
+    content: '✓ ';
+}
+
+.condition-pill.unmet::before {
+    content: '✗ ';
+    color: #e74c3c;
+}
+
+/* Threshold Marker on Metric Bars — sits inside the container */
+.threshold-marker {
+    position: absolute;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: #f39c12;
+    border-radius: 2px;
+    z-index: 2;
+    box-shadow: 0 0 8px rgba(243, 156, 18, 1);
+    pointer-events: none;
+}
+
+/* Action Controls (Undo / Reset) */
+.action-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.undo-btn {
+    background: rgba(116, 185, 255, 0.1);
+    border-color: #74b9ff;
+    color: #74b9ff;
+}
+
+.undo-btn:hover:not(:disabled) {
+    background: rgba(116, 185, 255, 0.25);
+}
+
+.undo-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.reset-btn {
+    background: rgba(231, 76, 60, 0.1);
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+
+.reset-btn:hover {
+    background: rgba(231, 76, 60, 0.25);
+}
+
+/* Hint Section */
+.hint-section {
+    margin-bottom: 15px;
+}
+
+.hint-btn {
+    width: 100%;
+    padding: 10px;
+    background: rgba(253, 203, 110, 0.15);
+    border: 2px solid #fdcb6e;
+    border-radius: 8px;
+    color: #fdcb6e;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.hint-btn:hover {
+    background: rgba(253, 203, 110, 0.3);
+}
+
+.hint-btn.exhausted {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.hint-box {
+    margin-top: 10px;
+    background: rgba(253, 203, 110, 0.1);
+    border: 2px solid #fdcb6e;
+    border-radius: 10px;
+    padding: 12px 15px;
+    animation: fadeIn 0.3s ease;
+}
+
+.hint-tier {
+    font-size: 11px;
+    color: #fdcb6e;
+    font-weight: bold;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.hint-text {
+    font-size: 14px;
+    color: #dfe6e9;
+    line-height: 1.5;
+}
+
+/* Math Panel */
+.math-panel {
+    background: rgba(0,0,0,0.3);
+    border: 2px solid rgba(116, 185, 255, 0.3);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.math-panel summary {
+    padding: 12px 15px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #74b9ff;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+}
+
+.math-panel summary::-webkit-details-marker {
+    display: none;
+}
+
+.math-panel summary::before {
+    content: '▶ ';
+    font-size: 10px;
+    transition: transform 0.3s;
+}
+
+.math-panel[open] summary::before {
+    content: '▼ ';
+}
+
+.math-table-wrapper {
+    overflow-x: auto;
+    padding: 0 10px 10px;
+}
+
+.math-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.math-table th {
+    color: #74b9ff;
+    text-align: center;
+    padding: 6px 8px;
+    border-bottom: 1px solid rgba(116, 185, 255, 0.3);
+    white-space: nowrap;
+}
+
+.math-table td {
+    text-align: center;
+    padding: 5px 8px;
+    color: #dfe6e9;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    white-space: nowrap;
+}
+
+.math-table td:first-child {
+    text-align: left;
+    font-weight: 600;
+    color: #ffeaa7;
+}
+
+.math-table td.positive {
+    color: #00b894;
+}
+
+.math-table td.negative {
+    color: #e74c3c;
+}
+
+.math-table td.final-col {
+    font-weight: bold;
+    color: #00b894;
+}
+
+/* Revenue Breakdown on Team Cards */
+.revenue-breakdown {
+    font-size: 11px;
+    color: #636e72;
+    margin-bottom: 8px;
+    line-height: 1.4;
+    display: none;
+}
+
+.team-card:hover .revenue-breakdown {
+    display: block;
+}
+
+/* Compare to Reality Panel in Success Modal */
+.reality-compare {
+    background: linear-gradient(135deg, rgba(0,184,148,0.15), rgba(0,184,148,0.05));
+    border: 2px solid #00b894;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.reality-label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #00b894;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.reality-text {
+    font-size: 13px;
+    color: #dfe6e9;
+    line-height: 1.6;
+}
+
+/* Random Event Modal */
+.event-modal-content {
+    max-width: 450px;
+    text-align: center;
+    background: linear-gradient(135deg, #1e3a5f 0%, #0f3460 100%);
+    border: 2px solid #74b9ff;
+}
+
+.event-icon {
+    font-size: 60px;
+    margin-bottom: 10px;
+}
+
+.event-title {
+    font-size: 24px;
+    color: #ffeaa7;
+    margin-bottom: 10px;
+}
+
+.event-text {
+    font-size: 16px;
+    color: #dfe6e9;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.event-impact {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.event-impact.positive-impact {
+    color: #00b894;
+}
+
+.event-impact.negative-impact {
+    color: #e74c3c;
+}
+
+.event-countdown {
+    font-size: 13px;
+    color: #b2bec3;
+}
+
+.event-bar {
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.event-bar-fill {
+    height: 100%;
+    background: #74b9ff;
+    border-radius: 3px;
+    width: 100%;
+    animation: eventCountdown 3.5s linear forwards;
+}
+
+@keyframes eventCountdown {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+/* Hold-to-Win Indicator */
+.hold-indicator {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #00b894 0%, #00a383 100%);
+    padding: 15px 30px;
+    border-radius: 30px;
+    box-shadow: 0 8px 30px rgba(0, 184, 148, 0.5);
+    z-index: 500;
+    animation: slideUpFade 0.3s ease;
+    text-align: center;
+    min-width: 200px;
+}
+
+.hold-text {
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 8px;
+}
+
+.hold-bar-bg {
+    height: 8px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.hold-bar-fill {
+    height: 100%;
+    background: white;
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.05s linear;
+}
+
+@keyframes slideUpFade {
+    from { opacity: 0; transform: translate(-50%, 20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Near-Solution Encouragement */
+.overall-status.near-solution {
+    background: linear-gradient(135deg, rgba(116, 185, 255, 0.3), rgba(0, 184, 148, 0.3));
+    color: #ffeaa7;
+    animation: nearSolutionPulse 1.5s infinite;
+}
+
+@keyframes nearSolutionPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(116, 185, 255, 0.4); }
+    50% { box-shadow: 0 0 20px 5px rgba(116, 185, 255, 0.2); }
+}
+
+/* Toast Notification */
+.toast {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: #2d3436;
+    color: #fff;
+    padding: 14px 28px;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 600;
+    z-index: 2000;
+    border: 2px solid #636e72;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast.error {
+    border-color: #e74c3c;
+    background: linear-gradient(135deg, #2d3436, #3d1515);
+}
+
+.toast.success {
+    border-color: #00b894;
+    background: linear-gradient(135deg, #2d3436, #0d2f27);
+}
+
+/* Confetti Particles */
+.confetti-particle {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    top: -20px;
+    z-index: 9999;
+    pointer-events: none;
+    border-radius: 2px;
+    animation: confettiDrop linear forwards;
+}
+
+@keyframes confettiDrop {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
     }
 }
