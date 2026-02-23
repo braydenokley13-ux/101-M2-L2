@@ -31,6 +31,7 @@ let isSandboxMode = false;
 // V2 State
 let historyStack = [];
 let hintLevel = 0;
+let _lastTeamCount = 0; // tracks when to rebuild team card DOM vs just refresh
 let holdTimer = null;
 let holdProgress = 0;
 let holdInterval = null;
@@ -333,7 +334,7 @@ function debouncedUpdate() {
     debounceTimer = setTimeout(() => {
         updateCalculations();
         saveCurrentSettings();
-    }, 50);
+    }, 120);
 }
 
 /**
@@ -671,58 +672,73 @@ function updateWarnings(results, levelConfig) {
 }
 
 /**
- * Update team cards with mood and quotes
+ * Update team cards — builds DOM once per level, then only patches changed values.
+ * This eliminates the full innerHTML rebuild on every slider tick.
  */
 function updateTeamCards(results) {
     const container = document.getElementById('teamsGrid');
-    container.innerHTML = '';
 
-    results.forEach(team => {
-        const card = document.createElement('div');
-        card.className = `team-card ${team.market}-market`;
+    // Rebuild the card shells only when team count changes (new level start)
+    if (results.length !== _lastTeamCount) {
+        container.innerHTML = '';
+        results.forEach((team, i) => {
+            const card = document.createElement('div');
+            card.className = `team-card ${team.market}-market`;
+            card.innerHTML = `
+                <div class="team-header">
+                    <span class="team-name">${team.name}</span>
+                    <span class="team-mood" id="tc-mood-${i}">${team.mood}</span>
+                </div>
+                <div class="market-badge ${team.market}">
+                    ${team.market.toUpperCase()} MARKET
+                </div>
+                <div class="revenue-display">
+                    <div class="revenue-label">Final Revenue</div>
+                    <div class="revenue-value" id="tc-rev-${i}">$${team.finalRevenue}M</div>
+                </div>
+                <div class="revenue-change" id="tc-chg-${i}">+$0M from base</div>
+                <div class="revenue-breakdown" id="tc-bkd-${i}"></div>
+                <div class="satisfaction-bar-container">
+                    <div class="satisfaction-bar sat-low" id="tc-sat-${i}" style="width: 0%"></div>
+                </div>
+                <div class="team-quote" id="tc-qte-${i}">${team.quote}</div>
+            `;
+            container.appendChild(card);
+        });
+        _lastTeamCount = results.length;
+    }
 
+    // Patch only the dynamic values — no DOM rebuild, no layout thrash
+    results.forEach((team, i) => {
         const changeClass = team.change >= 0 ? 'positive' : 'negative';
         const changeSymbol = team.change >= 0 ? '+' : '';
-
-        let satisfactionClass = 'sat-low';
-        if (team.satisfaction >= 70) satisfactionClass = 'sat-high';
-        else if (team.satisfaction >= 50) satisfactionClass = 'sat-mid';
-
+        const satClass = team.satisfaction >= 70 ? 'sat-high' : team.satisfaction >= 50 ? 'sat-mid' : 'sat-low';
         const sharedOut = Math.round(team.baseRevenue * (sharingPercent / 100) * 10) / 10;
-        const received = team.redistribution;
 
-        card.innerHTML = `
-            <div class="team-header">
-                <span class="team-name">${team.name}</span>
-                <span class="team-mood">${team.mood}</span>
-            </div>
-            <div class="market-badge ${team.market}">
-                ${team.market.toUpperCase()} MARKET
-            </div>
-            <div class="revenue-display">
-                <div class="revenue-label">Final Revenue</div>
-                <div class="revenue-value">$${team.finalRevenue}M</div>
-            </div>
-            <div class="revenue-change ${changeClass}">
-                ${changeSymbol}$${Math.abs(team.change)}M from base
-            </div>
-            <div class="revenue-breakdown">
-                Base $${team.baseRevenue}M → Shared -$${sharedOut}M → Rcvd +$${received}M${team.luxuryTaxPaid > 0 ? ` → Tax -$${team.luxuryTaxPaid}M` : ''}${team.luxuryTaxReceived > 0 ? ` → +$${team.luxuryTaxReceived}M` : ''}
-            </div>
-            <div class="satisfaction-bar-container">
-                <div class="satisfaction-bar ${satisfactionClass}" style="width: ${team.satisfaction}%"></div>
-            </div>
-            <div class="team-quote">${team.quote}</div>
-        `;
+        document.getElementById(`tc-mood-${i}`).textContent = team.mood;
+        document.getElementById(`tc-rev-${i}`).textContent = `$${team.finalRevenue}M`;
 
-        container.appendChild(card);
+        const chgEl = document.getElementById(`tc-chg-${i}`);
+        chgEl.textContent = `${changeSymbol}$${Math.abs(team.change)}M from base`;
+        chgEl.className = `revenue-change ${changeClass}`;
+
+        const satEl = document.getElementById(`tc-sat-${i}`);
+        satEl.style.width = `${team.satisfaction}%`;
+        satEl.className = `satisfaction-bar ${satClass}`;
+
+        document.getElementById(`tc-bkd-${i}`).textContent =
+            `Base $${team.baseRevenue}M → Shared -$${sharedOut}M → Rcvd +$${team.redistribution}M${team.luxuryTaxPaid > 0 ? ` → Tax -$${team.luxuryTaxPaid}M` : ''}${team.luxuryTaxReceived > 0 ? ` → +$${team.luxuryTaxReceived}M` : ''}`;
+
+        document.getElementById(`tc-qte-${i}`).textContent = team.quote;
     });
 }
 
 /**
- * Render the math breakdown table
+ * Render the math breakdown table — skipped when panel is collapsed
  */
 function renderMathPanel(results) {
+    const panel = document.getElementById('mathPanel');
+    if (!panel || !panel.open) return; // skip expensive table render when hidden
     const tbody = document.getElementById('mathTableBody');
     if (!tbody) return;
 

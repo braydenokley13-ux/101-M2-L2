@@ -372,7 +372,7 @@
                     </div>
 
                     <!-- Show the Math Panel -->
-                    <details class="math-panel" id="mathPanel">
+                    <details class="math-panel" id="mathPanel" ontoggle="if(this.open && currentResults) renderMathPanel(currentResults)">
                         <summary>📐 Show How the Math Works</summary>
                         <div class="math-table-wrapper">
                             <table class="math-table" id="mathTable">
