@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NBA League Commissioner - Revenue Sharing Challenge</title>
+    <title>NBA League Commissioner - Revenue Sharing Challenge V2</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -26,6 +26,14 @@
         <div id="levelSelect" class="level-select">
             <h2>Choose Your Challenge</h2>
             <p class="instructions">You're the NBA Commissioner! Balance the interests of big markets, small markets, AND league parity. It's harder than it looks!</p>
+
+            <!-- Progress Overview -->
+            <div class="progress-overview" id="progressOverview">
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <div class="progress-label" id="progressLabel">0 / 5 Levels Complete</div>
+            </div>
 
             <div class="levels-grid">
                 <div class="level-card" data-level="1">
@@ -144,6 +152,11 @@
                 </div>
             </div>
 
+            <!-- Sandbox Mode Button -->
+            <div class="sandbox-section">
+                <button class="sandbox-btn" onclick="startSandbox()">🧪 Sandbox Mode — Free Explore (No Win Conditions)</button>
+            </div>
+
             <!-- Key Concept Box -->
             <div class="concept-box">
                 <h3>💡 The Commissioner's Dilemma</h3>
@@ -196,6 +209,13 @@
                 <div class="current-level-display">
                     <span id="currentLevelName">Level 1: Rookie League</span>
                     <span class="difficulty-tag" id="levelDifficulty">Easy</span>
+                    <span class="sandbox-tag hidden" id="sandboxTag">🧪 SANDBOX</span>
+                </div>
+                <!-- 3-Part Condition Tracker -->
+                <div class="condition-tracker">
+                    <div class="condition-pill" id="condParity">⚖️ Parity</div>
+                    <div class="condition-pill" id="condBig">💰 Big Mkt</div>
+                    <div class="condition-pill" id="condSmall">🏟️ Small Mkt</div>
                 </div>
             </div>
 
@@ -229,6 +249,7 @@
                     </div>
                     <div class="metric-bar-container">
                         <div class="metric-bar parity-bar" id="parityFill" style="width: 0%"></div>
+                        <div class="threshold-marker" id="parityThreshold"></div>
                     </div>
                     <div class="metric-footer">
                         <span class="metric-score" id="parityScore">0%</span>
@@ -245,6 +266,7 @@
                     </div>
                     <div class="metric-bar-container">
                         <div class="metric-bar big-market-bar" id="bigMarketFill" style="width: 0%"></div>
+                        <div class="threshold-marker" id="bigMarketThreshold"></div>
                     </div>
                     <div class="metric-footer">
                         <span class="metric-score" id="bigMarketScore">0%</span>
@@ -261,6 +283,7 @@
                     </div>
                     <div class="metric-bar-container">
                         <div class="metric-bar small-market-bar" id="smallMarketFill" style="width: 0%"></div>
+                        <div class="threshold-marker" id="smallMarketThreshold"></div>
                     </div>
                     <div class="metric-footer">
                         <span class="metric-score" id="smallMarketScore">0%</span>
@@ -332,6 +355,42 @@
                             <div class="stat-value" id="revenueGap">$0M</div>
                         </div>
                     </div>
+
+                    <!-- Undo / Reset Controls -->
+                    <div class="action-controls">
+                        <button class="action-btn undo-btn" onclick="undoLastAction()" id="undoBtn" disabled>↩ Undo</button>
+                        <button class="action-btn reset-btn" onclick="resetLevel()">🔄 Reset Level</button>
+                    </div>
+
+                    <!-- Hint System -->
+                    <div class="hint-section">
+                        <button class="hint-btn" onclick="showNextHint()" id="hintBtn">💡 Need a Hint?</button>
+                        <div class="hint-box hidden" id="hintBox">
+                            <div class="hint-tier" id="hintTierLabel">Hint 1 of 3</div>
+                            <div class="hint-text" id="hintText"></div>
+                        </div>
+                    </div>
+
+                    <!-- Show the Math Panel -->
+                    <details class="math-panel" id="mathPanel">
+                        <summary>📐 Show How the Math Works</summary>
+                        <div class="math-table-wrapper">
+                            <table class="math-table" id="mathTable">
+                                <thead>
+                                    <tr>
+                                        <th>Team</th>
+                                        <th>Base</th>
+                                        <th>-Shared</th>
+                                        <th>+Received</th>
+                                        <th>-Lux Tax</th>
+                                        <th>+Lux Rcvd</th>
+                                        <th>= Final</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mathTableBody"></tbody>
+                            </table>
+                        </div>
+                    </details>
                 </div>
 
                 <!-- Right Panel: Visualization -->
@@ -353,11 +412,16 @@
             <!-- Success Modal -->
             <div id="successModal" class="modal hidden">
                 <div class="modal-content">
-                    <div class="confetti"></div>
+                    <div id="confettiContainer"></div>
                     <h2>🎉 Level Complete!</h2>
                     <p class="success-message" id="successMessage"></p>
                     <div class="lesson-recap">
                         <p><strong>You learned:</strong> Revenue sharing is about finding the balance where big markets don't feel robbed and small markets can still compete. That's exactly what real commissioners do!</p>
+                    </div>
+                    <!-- Compare to Reality Panel -->
+                    <div class="reality-compare" id="realityCompare">
+                        <div class="reality-label">🏀 Real NBA Facts</div>
+                        <div class="reality-text" id="realityText"></div>
                     </div>
                     <div class="claim-code-reveal">
                         <div class="code-label">Your Claim Code:</div>
@@ -367,9 +431,33 @@
                         </div>
                     </div>
                     <div class="modal-actions">
-                        <button class="btn-secondary" onclick="closeSuccessModal()">Next Level</button>
-                        <button class="btn-primary" onclick="retryLevel()">Try Again</button>
+                        <button class="btn-primary" onclick="closeSuccessModal()">Play Next Level →</button>
+                        <button class="btn-secondary" onclick="retryLevel()">Play Again</button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Random Event Modal -->
+            <div id="randomEventModal" class="modal hidden">
+                <div class="modal-content event-modal-content">
+                    <div class="event-icon" id="eventIcon">⚡</div>
+                    <h3 class="event-title">Breaking News!</h3>
+                    <p class="event-text" id="eventText"></p>
+                    <div class="event-impact" id="eventImpact"></div>
+                    <div class="event-countdown">
+                        <div class="event-bar">
+                            <div class="event-bar-fill" id="eventBarFill"></div>
+                        </div>
+                        <span>Adjusting your league...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hold-to-Win indicator -->
+            <div id="holdIndicator" class="hold-indicator hidden">
+                <div class="hold-text">🔒 Hold steady...</div>
+                <div class="hold-bar-bg">
+                    <div class="hold-bar-fill" id="holdBarFill"></div>
                 </div>
             </div>
         </div>
