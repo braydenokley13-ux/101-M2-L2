@@ -3,468 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NBA League Commissioner - Revenue Sharing Challenge V2</title>
+    <title>Small Markets, Big Money — Bow Sports Capital Front Office</title>
+    <meta name="description" content="A Bow Sports Capital front-office case on revenue sharing and competitive balance. Make the call, see the fallout, defend the plan.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <!-- Background -->
-    <div class="basketball-court"></div>
-
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="logo">
-                <div class="basketball-icon">🏀</div>
-                <h1>NBA League Commissioner</h1>
+    <!-- ============ MASTHEAD ============ -->
+    <header class="masthead">
+        <div class="masthead-inner">
+            <div class="brand">
+                <span class="brand-mark">BOW SPORTS CAPITAL</span>
+                <span class="brand-divider">/</span>
+                <span class="brand-room">THE STRATEGY ROOM</span>
             </div>
-            <div class="subtitle">Revenue Sharing Challenge - Balance Competing Interests!</div>
-        </header>
-
-        <!-- Level Selection Screen -->
-        <div id="levelSelect" class="level-select">
-            <h2>Choose Your Challenge</h2>
-            <p class="instructions">You're the NBA Commissioner! Balance the interests of big markets, small markets, AND league parity. It's harder than it looks!</p>
-
-            <!-- Progress Overview -->
-            <div class="progress-overview" id="progressOverview">
-                <div class="progress-track">
-                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-                </div>
-                <div class="progress-label" id="progressLabel">0 / 5 Levels Complete</div>
-            </div>
-
-            <div class="levels-grid">
-                <div class="level-card" data-level="1">
-                    <div class="level-badge">Level 1</div>
-                    <div class="difficulty-badge easy">Easy</div>
-                    <h3>🏀 Rookie League</h3>
-                    <p>Learn the basics - balance three competing interests</p>
-                    <div class="level-stats">
-                        <div class="stat-row">
-                            <span>Parity Target:</span>
-                            <span>65%</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Big Market Min:</span>
-                            <span>50%</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Small Market Min:</span>
-                            <span>60%</span>
-                        </div>
-                    </div>
-                    <button class="play-btn" onclick="startLevel(1)">Play</button>
-                    <div class="completion-badge" id="level1Complete">✅ Completed</div>
-                </div>
-
-                <div class="level-card locked" data-level="2">
-                    <div class="level-badge">Level 2</div>
-                    <div class="difficulty-badge medium">Medium</div>
-                    <h3>⭐ All-Star Challenge</h3>
-                    <p>Big market owners are getting vocal about fairness</p>
-                    <div class="level-stats">
-                        <div class="stat-row">
-                            <span>Parity Target:</span>
-                            <span>68%</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Big Market Min:</span>
-                            <span>55%</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Small Market Min:</span>
-                            <span>65%</span>
-                        </div>
-                    </div>
-                    <button class="play-btn" onclick="startLevel(2)">Play</button>
-                    <div class="completion-badge" id="level2Complete">✅ Completed</div>
-                </div>
-
-                <div class="level-card locked" data-level="3">
-                    <div class="level-badge">Level 3</div>
-                    <div class="difficulty-badge hard">Hard</div>
-                    <h3>🏆 Conference Finals</h3>
-                    <p>Luxury tax adds another tool - use it wisely</p>
-                    <div class="level-stats">
-                        <div class="stat-row">
-                            <span>Parity Target:</span>
-                            <span>72%</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Big Market Min:</span>
-                            <span>52%</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Small Market Min:</span>
-                            <span>68%</span>
-                        </div>
-                    </div>
-                    <button class="play-btn" onclick="startLevel(3)">Play</button>
-                    <div class="completion-badge" id="level3Complete">✅ Completed</div>
-                </div>
-
-                <div class="level-card locked" data-level="4">
-                    <div class="level-badge">Level 4</div>
-                    <div class="difficulty-badge very-hard">Very Hard</div>
-                    <h3>🎖️ NBA Finals</h3>
-                    <p>The sweet spot is narrow - precision matters</p>
-                    <div class="level-stats">
-                        <div class="stat-row">
-                            <span>Parity Target:</span>
-                            <span>75%</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Big Market Min:</span>
-                            <span>48%</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Small Market Min:</span>
-                            <span>72%</span>
-                        </div>
-                    </div>
-                    <button class="play-btn" onclick="startLevel(4)">Play</button>
-                    <div class="completion-badge" id="level4Complete">✅ Completed</div>
-                </div>
-
-                <div class="level-card locked" data-level="5">
-                    <div class="level-badge">Level 5</div>
-                    <div class="difficulty-badge expert">Expert</div>
-                    <h3>👑 Commissioner Legend</h3>
-                    <p>Ultimate challenge - every team has an opinion</p>
-                    <div class="level-stats">
-                        <div class="stat-row">
-                            <span>Parity Target:</span>
-                            <span>78%</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Big Market Min:</span>
-                            <span>45%</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Small Market Min:</span>
-                            <span>75%</span>
-                        </div>
-                    </div>
-                    <button class="play-btn" onclick="startLevel(5)">Play</button>
-                    <div class="completion-badge" id="level5Complete">✅ Completed</div>
-                </div>
-            </div>
-
-            <!-- Sandbox Mode Button -->
-            <div class="sandbox-section">
-                <button class="sandbox-btn" onclick="startSandbox()">🧪 Sandbox Mode — Free Explore (No Win Conditions)</button>
-            </div>
-
-            <!-- Key Concept Box -->
-            <div class="concept-box">
-                <h3>💡 The Commissioner's Dilemma</h3>
-                <p><strong>Big markets say:</strong> "We earned this revenue! Why should we subsidize our competition?"</p>
-                <p><strong>Small markets say:</strong> "We can't compete without help! How is that fair to our fans?"</p>
-                <p><strong>Your job:</strong> Find the balance where BOTH sides can live with the deal. That's real commissioner work!</p>
-            </div>
-
-            <!-- Claim Codes Display -->
-            <div class="claim-codes-section">
-                <h3>🎯 Your Achievement Codes</h3>
-                <div class="codes-grid">
-                    <div class="code-card" id="code1">
-                        <div class="code-label">Level 1 Complete</div>
-                        <div class="code-value locked">🔒 Complete Level 1</div>
-                    </div>
-                    <div class="code-card" id="code2">
-                        <div class="code-label">Level 2 Complete</div>
-                        <div class="code-value locked">🔒 Complete Level 2</div>
-                    </div>
-                    <div class="code-card" id="code3">
-                        <div class="code-label">Level 3 Complete</div>
-                        <div class="code-value locked">🔒 Complete Level 3</div>
-                    </div>
-                    <div class="code-card special" id="code3bonus">
-                        <div class="code-label">⭐ 3 Levels Bonus</div>
-                        <div class="code-value locked">🔒 Complete 3 Levels</div>
-                    </div>
-                    <div class="code-card" id="code4">
-                        <div class="code-label">Level 4 Complete</div>
-                        <div class="code-value locked">🔒 Complete Level 4</div>
-                    </div>
-                    <div class="code-card" id="code5">
-                        <div class="code-label">Level 5 Complete</div>
-                        <div class="code-value locked">🔒 Complete Level 5</div>
-                    </div>
-                    <div class="code-card special master" id="code5bonus">
-                        <div class="code-label">🏆 MASTER COMMISSIONER</div>
-                        <div class="code-value locked">🔒 Complete All 5 Levels</div>
-                    </div>
-                </div>
-            </div>
+            <div class="masthead-meta">TRACK 101 · MODULE 2 · LESSON 2</div>
         </div>
+        <!-- Progress rail -->
+        <nav class="progress-rail" id="progressRail" aria-label="Case progress">
+            <span class="rail-step" data-step="0">Case File</span>
+            <span class="rail-step" data-step="1">Situation</span>
+            <span class="rail-step" data-step="2">Call 1</span>
+            <span class="rail-step" data-step="3">Fallout</span>
+            <span class="rail-step" data-step="4">Call 2</span>
+            <span class="rail-step" data-step="5">Fallout</span>
+            <span class="rail-step" data-step="6">Defend</span>
+            <span class="rail-step" data-step="7">Recap</span>
+        </nav>
+    </header>
 
-        <!-- Game Screen -->
-        <div id="gameScreen" class="game-screen hidden">
-            <!-- Level Info Bar -->
-            <div class="level-info-bar">
-                <button class="back-btn" onclick="backToLevels()">← Back to Levels</button>
-                <div class="current-level-display">
-                    <span id="currentLevelName">Level 1: Rookie League</span>
-                    <span class="difficulty-tag" id="levelDifficulty">Easy</span>
-                    <span class="sandbox-tag hidden" id="sandboxTag">🧪 SANDBOX</span>
+    <main class="stage">
+
+        <!-- ============ 0. OPENING CASE FILE ============ -->
+        <section class="panel active" id="panel-casefile">
+            <p class="kicker">Front Office Case File</p>
+            <h1 class="headline">Small Markets,<br><span class="hl-accent">Big Money.</span></h1>
+            <p class="standfirst">A few big-city teams are pulling away from the league. The money gap is getting ugly. The front office needs a revenue-sharing plan — and they want your read.</p>
+
+            <div class="brief-grid">
+                <div class="brief-card">
+                    <span class="brief-label">Your Role</span>
+                    <p class="brief-body">League Revenue Strategist, Bow Sports Capital. New to the room. Sharp on the numbers.</p>
                 </div>
-                <!-- 3-Part Condition Tracker -->
-                <div class="condition-tracker">
-                    <div class="condition-pill" id="condParity">⚖️ Parity</div>
-                    <div class="condition-pill" id="condBig">💰 Big Mkt</div>
-                    <div class="condition-pill" id="condSmall">🏟️ Small Mkt</div>
+                <div class="brief-card">
+                    <span class="brief-label">The Mission</span>
+                    <p class="brief-body">Recommend how much money rich teams should share — without blowing up the league.</p>
                 </div>
-            </div>
-
-            <!-- Tutorial Overlay (Level 1 only) -->
-            <div id="tutorialOverlay" class="tutorial-overlay hidden">
-                <div class="tutorial-content">
-                    <h3>Welcome, Commissioner! 👋</h3>
-                    <p id="tutorialText"></p>
-                    <button class="tutorial-btn" onclick="nextTutorialStep()">Next</button>
-                </div>
-            </div>
-
-            <!-- Warning Messages -->
-            <div id="warningMessages" class="warning-messages" style="display: none;"></div>
-
-            <!-- Coach's Tips -->
-            <div class="coach-corner">
-                <div class="coach-icon">🧑‍🏫</div>
-                <div class="coach-message" id="coachMessage">
-                    Balance revenue sharing to keep everyone happy - but that's easier said than done!
+                <div class="brief-card">
+                    <span class="brief-label">The Problem</span>
+                    <p class="brief-body">Big markets earn way more than small markets. If the gap grows, games get lopsided and fans leave.</p>
                 </div>
             </div>
 
-            <!-- Three Metrics Display -->
-            <div class="metrics-dashboard">
-                <!-- Parity Meter -->
-                <div class="metric-card parity-card">
-                    <div class="metric-header">
-                        <span class="metric-title">⚖️ League Parity</span>
-                        <span class="metric-goal">Goal: <span id="goalParity">65</span>%+</span>
-                    </div>
-                    <div class="metric-bar-container">
-                        <div class="metric-bar parity-bar" id="parityFill" style="width: 0%"></div>
-                        <div class="threshold-marker" id="parityThreshold"></div>
-                    </div>
-                    <div class="metric-footer">
-                        <span class="metric-score" id="parityScore">0%</span>
-                        <span class="status-indicator status-fail" id="parityIndicator">✗</span>
-                    </div>
-                    <div class="metric-explain">Ratio of smallest to largest team revenue</div>
-                </div>
-
-                <!-- Big Market Satisfaction -->
-                <div class="metric-card big-market-card">
-                    <div class="metric-header">
-                        <span class="metric-title">💰 Big Market Owners</span>
-                        <span class="metric-goal">Min: <span id="goalBigMarket">50</span>%</span>
-                    </div>
-                    <div class="metric-bar-container">
-                        <div class="metric-bar big-market-bar" id="bigMarketFill" style="width: 0%"></div>
-                        <div class="threshold-marker" id="bigMarketThreshold"></div>
-                    </div>
-                    <div class="metric-footer">
-                        <span class="metric-score" id="bigMarketScore">0%</span>
-                        <span class="status-indicator status-fail" id="bigMarketIndicator">✗</span>
-                    </div>
-                    <div class="metric-explain">"We earned this - why subsidize others?"</div>
-                </div>
-
-                <!-- Small Market Viability -->
-                <div class="metric-card small-market-card">
-                    <div class="metric-header">
-                        <span class="metric-title">🏟️ Small Market Survival</span>
-                        <span class="metric-goal">Min: <span id="goalSmallMarket">60</span>%</span>
-                    </div>
-                    <div class="metric-bar-container">
-                        <div class="metric-bar small-market-bar" id="smallMarketFill" style="width: 0%"></div>
-                        <div class="threshold-marker" id="smallMarketThreshold"></div>
-                    </div>
-                    <div class="metric-footer">
-                        <span class="metric-score" id="smallMarketScore">0%</span>
-                        <span class="status-indicator status-fail" id="smallMarketIndicator">✗</span>
-                    </div>
-                    <div class="metric-explain">Can small markets field competitive teams?</div>
-                </div>
+            <div class="plain-english">
+                <span class="pe-tag">Plain English</span>
+                <p><strong>Revenue sharing</strong> means the league takes some money from every team and spreads it around so smaller teams can keep up. <strong>Competitive balance</strong> means most teams have a real shot at winning — which is what keeps fans watching.</p>
             </div>
 
-            <!-- Overall Status -->
-            <div class="overall-status none" id="overallStatus">
-                ⚖️ Find the balance that works for everyone
+            <button class="cta" data-goto="1">Open the Case File →</button>
+        </section>
+
+        <!-- ============ 1. SITUATION BOARD ============ -->
+        <section class="panel" id="panel-situation">
+            <p class="kicker">Step 1 — Read the room</p>
+            <h2 class="section-head">The Situation Board</h2>
+            <p class="section-sub">Five things every front office watches before a big money call. Read them. They all pull in different directions.</p>
+
+            <div class="board-grid">
+                <article class="board-card">
+                    <span class="board-num">01</span>
+                    <h3>What fans care about</h3>
+                    <p>Close games. Fans show up when their team has a real shot. Blowouts empty the seats.</p>
+                </article>
+                <article class="board-card">
+                    <span class="board-num">02</span>
+                    <h3>What ownership wants</h3>
+                    <p>Big-market owners say it straight: <em>"We earned this money. Why pay for our rivals?"</em></p>
+                </article>
+                <article class="board-card">
+                    <span class="board-num">03</span>
+                    <h3>What small markets risk</h3>
+                    <p>Without help, small-city teams can't afford star players. They fall behind — and some even leave town.</p>
+                </article>
+                <article class="board-card">
+                    <span class="board-num">04</span>
+                    <h3>What the league earns</h3>
+                    <p>More teams in the race = more national interest = a bigger TV deal for everyone. A boring league shrinks the money.</p>
+                </article>
+                <article class="board-card">
+                    <span class="board-num">05</span>
+                    <h3>What sponsors notice</h3>
+                    <p>Sponsors pay for eyeballs. Empty arenas and one-sided games make them nervous.</p>
+                </article>
             </div>
 
-            <!-- Main Dashboard -->
-            <div class="dashboard">
-                <!-- Left Panel: Controls -->
-                <div class="controls-panel">
-                    <div class="control-group">
-                        <label for="sharingSlider">
-                            <span class="label-text">Revenue Sharing Percentage</span>
-                            <span class="label-value" id="sharingValue">0%</span>
-                        </label>
-                        <input type="range" id="sharingSlider" class="slider" min="0" max="100" value="0" step="1">
-                        <div class="slider-labels">
-                            <span>0% (No sharing)</span>
-                            <span>100% (Full pool)</span>
-                        </div>
-                    </div>
-
-                    <div class="control-group" id="distributionControl">
-                        <label class="label-text">Distribution Method</label>
-                        <div class="toggle-group">
-                            <button class="toggle-btn active" data-type="equal" onclick="setDistribution('equal')">
-                                Equal Split
-                            </button>
-                            <button class="toggle-btn" data-type="weighted" onclick="setDistribution('weighted')">
-                                Market Weighted
-                            </button>
-                        </div>
-                        <div class="distribution-explainer">
-                            <p id="distributionExplain">Equal: Every team gets the same share. Simple and fair, but might not help small markets enough.</p>
-                        </div>
-                    </div>
-
-                    <div class="control-group" id="luxuryTaxControl" style="display: none;">
-                        <label for="luxurySlider">
-                            <span class="label-text">Luxury Tax Threshold ($M)</span>
-                            <span class="label-value" id="luxuryValue">$150M</span>
-                        </label>
-                        <input type="range" id="luxurySlider" class="slider luxury-slider" min="100" max="300" value="150" step="10">
-                        <div class="slider-labels">
-                            <span>$100M (Strict)</span>
-                            <span>$300M (Lenient)</span>
-                        </div>
-                        <div class="luxury-explainer">
-                            Teams above this threshold pay 40% tax that goes to smaller teams
-                        </div>
-                    </div>
-
-                    <!-- Quick Stats -->
-                    <div class="quick-stats">
-                        <div class="stat-item">
-                            <div class="stat-label">Total League Revenue</div>
-                            <div class="stat-value" id="totalRevenue">$0M</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Revenue Gap</div>
-                            <div class="stat-value" id="revenueGap">$0M</div>
-                        </div>
-                    </div>
-
-                    <!-- Undo / Reset Controls -->
-                    <div class="action-controls">
-                        <button class="action-btn undo-btn" onclick="undoLastAction()" id="undoBtn" disabled>↩ Undo</button>
-                        <button class="action-btn reset-btn" onclick="resetLevel()">🔄 Reset Level</button>
-                    </div>
-
-                    <!-- Hint System -->
-                    <div class="hint-section">
-                        <button class="hint-btn" onclick="showNextHint()" id="hintBtn">💡 Need a Hint?</button>
-                        <div class="hint-box hidden" id="hintBox">
-                            <div class="hint-tier" id="hintTierLabel">Hint 1 of 3</div>
-                            <div class="hint-text" id="hintText"></div>
-                        </div>
-                    </div>
-
-                    <!-- Show the Math Panel -->
-                    <details class="math-panel" id="mathPanel" ontoggle="if(this.open && currentResults) renderMathPanel(currentResults)">
-                        <summary>📐 Show How the Math Works</summary>
-                        <div class="math-table-wrapper">
-                            <table class="math-table" id="mathTable">
-                                <thead>
-                                    <tr>
-                                        <th>Team</th>
-                                        <th>Base</th>
-                                        <th>-Shared</th>
-                                        <th>+Received</th>
-                                        <th>-Lux Tax</th>
-                                        <th>+Lux Rcvd</th>
-                                        <th>= Final</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="mathTableBody"></tbody>
-                            </table>
-                        </div>
-                    </details>
-                </div>
-
-                <!-- Right Panel: Visualization -->
-                <div class="visualization-panel">
-                    <!-- Team Cards -->
-                    <div class="teams-container">
-                        <h3 class="section-title">NBA Teams - Watch Their Reactions!</h3>
-                        <div class="teams-grid" id="teamsGrid"></div>
-                    </div>
-
-                    <!-- Chart -->
-                    <div class="chart-container">
-                        <h3 class="section-title">Revenue Comparison</h3>
-                        <canvas id="revenueChart"></canvas>
-                    </div>
-                </div>
+            <div class="why-matters">
+                <span class="pe-tag">Why this matters</span>
+                <p>You can't make everyone happy at once. Help one side and you put pressure on another. That tension <em>is</em> the job.</p>
             </div>
 
-            <!-- Success Modal -->
-            <div id="successModal" class="modal hidden">
-                <div class="modal-content">
-                    <div id="confettiContainer"></div>
-                    <h2>🎉 Level Complete!</h2>
-                    <p class="success-message" id="successMessage"></p>
-                    <div class="lesson-recap">
-                        <p><strong>You learned:</strong> Revenue sharing is about finding the balance where big markets don't feel robbed and small markets can still compete. That's exactly what real commissioners do!</p>
-                    </div>
-                    <!-- Compare to Reality Panel -->
-                    <div class="reality-compare" id="realityCompare">
-                        <div class="reality-label">🏀 Real NBA Facts</div>
-                        <div class="reality-text" id="realityText"></div>
-                    </div>
-                    <div class="claim-code-reveal">
-                        <div class="code-label">Your Claim Code:</div>
-                        <div class="code-box" id="claimCodeBox">
-                            <span id="claimCodeText"></span>
-                            <button class="copy-btn" onclick="copyClaimCode()">Copy</button>
-                        </div>
-                    </div>
-                    <div class="modal-actions">
-                        <button class="btn-primary" onclick="closeSuccessModal()">Play Next Level →</button>
-                        <button class="btn-secondary" onclick="retryLevel()">Play Again</button>
-                    </div>
-                </div>
+            <div class="panel-nav">
+                <button class="cta-ghost" data-goto="0">← Back</button>
+                <button class="cta" data-goto="2">Check the numbers →</button>
+            </div>
+        </section>
+
+        <!-- ============ 2. DECISION ROUND 1 ============ -->
+        <section class="panel" id="panel-round1">
+            <p class="kicker">Step 2 — Make the call</p>
+            <h2 class="section-head">Decision 1: How much do we share?</h2>
+            <p class="section-sub">This is the big one. Pick the revenue-sharing plan you'd put in front of the owners. Every option helps somebody and costs somebody.</p>
+
+            <div class="decision-stack" id="round1Stack"></div>
+
+            <div class="panel-nav single">
+                <button class="cta-ghost" data-goto="1">← Back to the board</button>
+            </div>
+        </section>
+
+        <!-- ============ 3. CONSEQUENCE CARD 1 ============ -->
+        <section class="panel" id="panel-consequence1">
+            <p class="kicker">Step 3 — See the fallout</p>
+            <h2 class="section-head">One Season Later…</h2>
+            <div class="consequence" id="consequence1"></div>
+            <div class="panel-nav single">
+                <button class="cta" data-goto="4">Handle the new pressure →</button>
+            </div>
+        </section>
+
+        <!-- ============ 4. DECISION ROUND 2 ============ -->
+        <section class="panel" id="panel-round2">
+            <p class="kicker">Step 4 — Make the next call</p>
+            <h2 class="section-head" id="round2Head">Decision 2</h2>
+            <p class="section-sub" id="round2Sub">Your first move fixed one thing and broke another. Now clean it up.</p>
+
+            <div class="decision-stack" id="round2Stack"></div>
+        </section>
+
+        <!-- ============ 5. CONSEQUENCE CARD 2 ============ -->
+        <section class="panel" id="panel-consequence2">
+            <p class="kicker">Step 5 — See the fallout</p>
+            <h2 class="section-head">How It Played Out</h2>
+            <div class="consequence" id="consequence2"></div>
+            <div class="panel-nav single">
+                <button class="cta" data-goto="6">Defend the plan →</button>
+            </div>
+        </section>
+
+        <!-- ============ 6. FINAL RECOMMENDATION ============ -->
+        <section class="panel" id="panel-recommendation">
+            <p class="kicker">Step 6 — Defend the plan</p>
+            <h2 class="section-head">Your Front-Office Memo</h2>
+            <p class="section-sub">Ownership is in the room. Defend your path in your own words. There are no wrong answers here — just make your case.</p>
+
+            <div class="memo">
+                <label class="memo-q">
+                    <span>1. What was your strategy in one sentence?</span>
+                    <textarea rows="2" placeholder="We chose to…"></textarea>
+                </label>
+                <label class="memo-q">
+                    <span>2. What did your plan improve?</span>
+                    <textarea rows="2" placeholder="It helped…"></textarea>
+                </label>
+                <label class="memo-q">
+                    <span>3. What risk did you accept on purpose?</span>
+                    <textarea rows="2" placeholder="We knew it might…"></textarea>
+                </label>
+                <label class="memo-q">
+                    <span>4. Who benefited most from your plan?</span>
+                    <textarea rows="2" placeholder="The biggest winners were…"></textarea>
+                </label>
+                <label class="memo-q">
+                    <span>5. What would ownership ask you next?</span>
+                    <textarea rows="2" placeholder="They'd probably want to know…"></textarea>
+                </label>
             </div>
 
-            <!-- Random Event Modal -->
-            <div id="randomEventModal" class="modal hidden">
-                <div class="modal-content event-modal-content">
-                    <div class="event-icon" id="eventIcon">⚡</div>
-                    <h3 class="event-title">Breaking News!</h3>
-                    <p class="event-text" id="eventText"></p>
-                    <div class="event-impact" id="eventImpact"></div>
-                    <div class="event-countdown">
-                        <div class="event-bar">
-                            <div class="event-bar-fill" id="eventBarFill"></div>
-                        </div>
-                        <span>Adjusting your league...</span>
-                    </div>
-                </div>
+            <div class="panel-nav single">
+                <button class="cta" data-goto="7">See the final recap →</button>
+            </div>
+        </section>
+
+        <!-- ============ 7. FINAL RECAP ============ -->
+        <section class="panel" id="panel-recap">
+            <p class="kicker">Step 7 — The debrief</p>
+            <h2 class="section-head">Case Closed</h2>
+
+            <div class="recap-path" id="recapPath"></div>
+
+            <h3 class="recap-subhead">Final Boardroom Metrics</h3>
+            <div class="metrics" id="recapMetrics"></div>
+
+            <div class="recap-tradeoff" id="recapTradeoff"></div>
+
+            <div class="takeaway">
+                <span class="pe-tag light">Front Office Takeaway</span>
+                <p id="takeawayText"></p>
             </div>
 
-            <!-- Hold-to-Win indicator -->
-            <div id="holdIndicator" class="hold-indicator hidden">
-                <div class="hold-text">🔒 Hold steady...</div>
-                <div class="hold-bar-bg">
-                    <div class="hold-bar-fill" id="holdBarFill"></div>
-                </div>
+            <div class="panel-nav single">
+                <button class="cta-ghost" id="restartBtn">↺ Run the case again</button>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <script src="js/parityEngine.js"></script>
-    <script src="js/gameLogic.js"></script>
-    <script src="js/visualization.js"></script>
+    </main>
+
+    <footer class="footer">
+        <span>Bow Sports Capital · Track 101 · Module 2 · Lesson 2 — Small Markets, Big Money</span>
+    </footer>
+
+    <script src="js/lesson.js"></script>
 </body>
 </html>
